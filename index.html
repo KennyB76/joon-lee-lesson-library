@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<!--
+  STUDENT PORTAL STANDARD (minimal)
+  Newton School / Live Classroom — Kenny portal v2 (2026-05-13)
+  Student: Joon Lee
+  Theme: violet (#a29bfe / #f0eeff / #5a4fcf / #f9f8ff)
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Joon Lee · Newton School Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@400;500;600&family=Noto+Serif+KR:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --student: #a29bfe;
+    --student-soft: #f0eeff;
+    --student-deep: #5a4fcf;
+    --ink: #1a1a1a;
+    --ink-soft: #555;
+    --paper: #ffffff;
+    --bg: #f9f8ff;
+    --line: #e8e8e8;
+    --serif: 'Playfair Display', 'Noto Serif KR', Georgia, serif;
+    --sans: 'Inter', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--sans); background: var(--bg); color: var(--ink); line-height: 1.6; }
+  .container { max-width: 680px; margin: 0 auto; background: var(--paper); box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
+  .masthead { text-align: center; padding: 48px 32px 24px; border-bottom: 3px double var(--student); }
+  .masthead .school { font-size: 11px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--student); font-weight: 600; margin-bottom: 12px; }
+  .masthead h1 { font-family: var(--serif); font-size: 42px; font-weight: 700; line-height: 1.1; margin-bottom: 6px; }
+  .masthead .subtitle { font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink-soft); }
+  .masthead .info { margin-top: 18px; font-size: 12px; color: var(--ink-soft); letter-spacing: 0.05em; }
+  .masthead .info span { margin: 0 8px; }
+  section { padding: 28px 32px; border-bottom: 1px solid var(--line); }
+  section .label { font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--student); font-weight: 600; margin-bottom: 8px; }
+  section h2 { font-family: var(--serif); font-size: 24px; font-weight: 700; margin-bottom: 12px; line-height: 1.2; }
+  section p { font-size: 14px; color: var(--ink-soft); margin-bottom: 12px; }
+  .coming-soon { background: var(--student-soft); border-radius: 10px; padding: 24px 28px; text-align: center; }
+  .coming-soon .cs-icon { font-size: 36px; margin-bottom: 10px; }
+  .coming-soon .cs-title { font-family: var(--serif); font-size: 20px; font-weight: 600; color: var(--student-deep); margin-bottom: 6px; }
+  .coming-soon .cs-desc { font-size: 13px; color: var(--ink-soft); }
+  .teacher-note { background: var(--bg); padding: 16px 20px; border-radius: 8px; border-left: 3px solid var(--student); margin-top: 12px; font-style: italic; color: var(--ink); font-size: 14px; line-height: 1.7; }
+  footer { text-align: center; padding: 32px; font-size: 11px; color: var(--ink-soft); }
+  footer .copyright { margin-top: 8px; font-style: italic; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header class="masthead">
+    <div class="school">Newton School Weekly</div>
+    <h1>Joon Lee</h1>
+    <div class="subtitle">Pre-Calculus</div>
+    <div class="info">
+      <span>Spring 2026</span>
+      <span>&middot;</span>
+      <span>Mr. Kenny</span>
+      <span>&middot;</span>
+      <span>Pre-Calculus</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="label">Lesson Materials</div>
+    <h2>Coming Soon</h2>
+    <div class="coming-soon">
+      <div class="cs-icon">&#128218;</div>
+      <div class="cs-title">Materials uploading soon</div>
+      <div class="cs-desc">Lesson PDFs and worksheets will appear here each week after class.</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="label">From Mr. Kenny</div>
+    <h2>A note</h2>
+    <div class="teacher-note">
+      "Joon &mdash; Pre-Calculus is the bridge to everything. We'll build it step by step. &mdash; Mr. K"
+    </div>
+  </section>
+
+  <footer>
+    <div>Newton School &middot; Spring 2026</div>
+    <div class="copyright">&copy; 2026 &middot; Made with care for Joon Lee</div>
+  </footer>
+</div>
+</body>
+</html>
