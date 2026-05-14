@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  STUDENT PORTAL STANDARD (minimal)
+  STUDENT PORTAL STANDARD (PDF popup)
   Newton School / Live Classroom — Kenny portal v2 (2026-05-13)
   Student: Joon Lee
   Theme: violet (#a29bfe / #f0eeff / #5a4fcf / #f9f8ff)
@@ -26,6 +26,7 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: var(--sans); background: var(--bg); color: var(--ink); line-height: 1.6; }
+  body.modal-open { overflow: hidden; }
   .container { max-width: 680px; margin: 0 auto; background: var(--paper); box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
   .masthead { text-align: center; padding: 48px 32px 24px; border-bottom: 3px double var(--student); }
   .masthead .school { font-size: 11px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--student); font-weight: 600; margin-bottom: 12px; }
@@ -37,13 +38,38 @@
   section .label { font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--student); font-weight: 600; margin-bottom: 8px; }
   section h2 { font-family: var(--serif); font-size: 24px; font-weight: 700; margin-bottom: 12px; line-height: 1.2; }
   section p { font-size: 14px; color: var(--ink-soft); margin-bottom: 12px; }
-  .coming-soon { background: var(--student-soft); border-radius: 10px; padding: 24px 28px; text-align: center; }
-  .coming-soon .cs-icon { font-size: 36px; margin-bottom: 10px; }
-  .coming-soon .cs-title { font-family: var(--serif); font-size: 20px; font-weight: 600; color: var(--student-deep); margin-bottom: 6px; }
-  .coming-soon .cs-desc { font-size: 13px; color: var(--ink-soft); }
+  ul.timeline { list-style: none; padding-left: 16px; border-left: 2px solid var(--student); }
+  ul.timeline li { padding: 10px 0 10px 16px; position: relative; font-size: 13px; display: flex; align-items: baseline; gap: 0; flex-wrap: wrap; }
+  ul.timeline li::before { content: ""; position: absolute; left: -22px; top: 16px; width: 8px; height: 8px; border-radius: 50%; background: var(--student); }
+  ul.timeline .date { font-weight: 600; color: var(--student); margin-right: 8px; white-space: nowrap; flex-shrink: 0; }
+  .popup-link { font-weight: 500; color: var(--ink); text-decoration: none; border-bottom: 1px solid transparent; transition: all 0.15s; cursor: pointer; }
+  .popup-link:hover { color: var(--student); border-bottom-color: var(--student); }
+  .pdf-badge { display: inline-block; margin-left: 6px; font-size: 10px; font-weight: 600; letter-spacing: 0.05em; background: var(--student-soft); color: var(--student-deep); border-radius: 3px; padding: 1px 5px; vertical-align: middle; }
+  .notes-badge { display: inline-block; margin-left: 6px; font-size: 10px; font-weight: 600; letter-spacing: 0.05em; background: #e8f5e9; color: #2e7d32; border-radius: 3px; padding: 1px 5px; vertical-align: middle; }
+  .today-badge { display: inline-block; margin-left: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.05em; background: var(--student-deep); color: #fff; border-radius: 3px; padding: 1px 6px; vertical-align: middle; }
+  /* Activity cards */
+  .kenny-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 16px; }
+  @media (max-width: 540px) { .kenny-cards { grid-template-columns: 1fr; } }
+  .kenny-card { display: block; padding: 18px 20px; border-radius: 10px; background: var(--paper); border: 1px solid var(--line); text-decoration: none; color: inherit; transition: all 0.2s; position: relative; overflow: hidden; cursor: pointer; }
+  .kenny-card:hover { border-color: var(--student); box-shadow: 0 4px 16px rgba(0,0,0,0.10); transform: translateY(-2px); }
+  .kenny-card .kc-icon { font-size: 28px; margin-bottom: 8px; }
+  .kenny-card .kc-title { font-family: var(--serif); font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+  .kenny-card .kc-desc { font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
+  .kenny-card .kc-arrow { position: absolute; top: 18px; right: 18px; color: var(--student); font-size: 14px; opacity: 0.4; transition: opacity 0.2s; }
+  .kenny-card:hover .kc-arrow { opacity: 1; }
   .teacher-note { background: var(--bg); padding: 16px 20px; border-radius: 8px; border-left: 3px solid var(--student); margin-top: 12px; font-style: italic; color: var(--ink); font-size: 14px; line-height: 1.7; }
   footer { text-align: center; padding: 32px; font-size: 11px; color: var(--ink-soft); }
   footer .copyright { margin-top: 8px; font-style: italic; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(10,20,40,0.78); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+  .modal-overlay.open { display: flex; }
+  .modal-box { background: #fff; border-radius: 12px; width: 92vw; max-width: 1100px; height: 92vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+  .modal-header { padding: 10px 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; font-family: var(--serif); font-size: 14px; color: var(--ink-soft); flex-shrink: 0; }
+  .modal-header-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .modal-title { font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .modal-esc { font-size: 11px; color: var(--ink-soft); opacity: 0.6; white-space: nowrap; }
+  .modal-close { background: transparent; border: none; font-size: 22px; cursor: pointer; color: var(--ink-soft); padding: 0 6px; flex-shrink: 0; line-height: 1; }
+  .modal-close:hover { color: var(--student); }
+  .modal-iframe { flex: 1; border: none; width: 100%; }
 </style>
 </head>
 <body>
@@ -63,12 +89,45 @@
   </header>
 
   <section>
-    <div class="label">Lesson Materials</div>
-    <h2>Coming Soon</h2>
-    <div class="coming-soon">
-      <div class="cs-icon">&#128218;</div>
-      <div class="cs-title">Materials uploading soon</div>
-      <div class="cs-desc">Lesson PDFs and worksheets will appear here each week after class.</div>
+    <div class="label">Recent Work</div>
+    <h2>This Month</h2>
+    <ul class="timeline">
+      <!-- 5/13 — TODAY: Hot Coffee PBA lecture note -->
+      <li>
+        <span class="date">5/13</span>
+        <a class="popup-link"
+           data-src="2026-05-13/JoonLee-2026-05-13-Precalculus_Class-HotCoffeePBA_LectureNote.pdf"
+           data-fallback="2026-05-13/JoonLee-2026-05-13-Precalculus_Class-HotCoffeePBA_LectureNote.html">
+          Newton's Law of Cooling &mdash; U4 PBA Lecture Note (6 Practice Problems)
+        </a>
+        <span class="notes-badge">Notes</span>
+        <span class="pdf-badge">PDF</span>
+        <span class="today-badge">TODAY</span>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="label">Play With It</div>
+    <h2>Interactive Activities</h2>
+    <p>Explore Newton's Law of Cooling two ways &mdash; a live slider toy or the full PBA mission with all three real containers.</p>
+    <div class="kenny-cards">
+      <a class="kenny-card popup-link"
+         data-src="interactive/hot-coffee-cooling.html"
+         data-label="Hot Coffee Cooling — Live (U4 PBA)">
+        <div class="kc-icon">&#9749;</div>
+        <div class="kc-title">Hot Coffee Cooling</div>
+        <div class="kc-desc">$T(t) = T_{\text{room}} + (T_0 - T_{\text{room}})e^{-kt}$ live. Move $T_0$, $k$, and target temp. See the asymptote and intersection animate.</div>
+        <div class="kc-arrow">&rarr;</div>
+      </a>
+      <a class="kenny-card popup-link"
+         data-src="interactive/hot-coffee-pba.html"
+         data-label="Hot Coffee PBA — Fit Your Own Data">
+        <div class="kc-icon">&#9749;</div>
+        <div class="kc-title">Hot Coffee PBA</div>
+        <div class="kc-desc">Based on the real school assignment. Compare all 3 containers, use the step-by-step solver, or fit your own $(t, T)$ data to find <em>k</em>.</div>
+        <div class="kc-arrow">&rarr;</div>
+      </a>
     </div>
   </section>
 
@@ -76,7 +135,7 @@
     <div class="label">From Mr. Kenny</div>
     <h2>A note</h2>
     <div class="teacher-note">
-      "Joon &mdash; Pre-Calculus is the bridge to everything. We'll build it step by step. &mdash; Mr. K"
+      "Joon &mdash; The horizontal asymptote isn't just a line &mdash; it's the physics. The coffee will always chase room temperature. That idea alone will carry you through the whole PBA. &mdash; Mr. K"
     </div>
   </section>
 
@@ -85,5 +144,42 @@
     <div class="copyright">&copy; 2026 &middot; Made with care for Joon Lee</div>
   </footer>
 </div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <span class="modal-title" id="modalTitle"></span>
+        <span class="modal-esc">ESC to close</span>
+      </div>
+      <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+    </div>
+    <iframe class="modal-iframe" id="modalIframe" src="about:blank"></iframe>
+  </div>
+</div>
+
+<script>
+  const overlay = document.getElementById('modalOverlay');
+  const iframe  = document.getElementById('modalIframe');
+  const title   = document.getElementById('modalTitle');
+  const openModal = (src, label) => {
+    iframe.src = src; title.textContent = label;
+    overlay.classList.add('open'); document.body.classList.add('modal-open');
+  };
+  const closeModal = () => {
+    overlay.classList.remove('open'); document.body.classList.remove('modal-open');
+    iframe.src = 'about:blank';
+  };
+  document.querySelectorAll('.popup-link').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const label = a.dataset.label || a.textContent.trim();
+      openModal(a.dataset.src, label);
+    });
+  });
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
 </body>
 </html>

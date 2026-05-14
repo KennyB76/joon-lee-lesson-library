@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Hot Coffee Cooling — Interactive (Joon Lee · U4 PBA)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'], ['\\(','\\)']], displayMath: [['$$','$$'], ['\\[','\\]']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<style>
+  :root {
+    --student:      #a29bfe;
+    --student-soft: #f0eeff;
+    --student-deep: #5a4fcf;
+    --ink:          #1a1a1a;
+    --ink-soft:     #555;
+    --bg:           #f9f8ff;
+    --paper:        #fff;
+    --line:         #ddd;
+    --ok:           #2e7d32;
+    --ok-soft:      #e8f5e9;
+    --warn:         #c62828;
+    --warn-soft:    #ffebee;
+    --curve:        #c0392b;
+    --asym:         #a29bfe;
+    --target-line:  #f39c12;
+    --dot:          #e74c3c;
+    --anim-dot:     #e74c3c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--ink); padding: 16px; line-height: 1.55; }
+  .wrap { max-width: 1120px; margin: 0 auto; }
+
+  header { padding: 18px 22px; background: var(--paper); border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 16px; border-top: 3px solid var(--student); }
+  header h1 { font-size: 22px; font-weight: 700; color: var(--student-deep); margin-bottom: 4px; }
+  header .meta { font-size: 12px; color: var(--ink-soft); letter-spacing: 0.04em; }
+
+  .grid { display: grid; grid-template-columns: 320px 1fr; gap: 16px; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--paper); border-radius: 10px; padding: 18px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 14px; }
+  .panel h2 { font-size: 12px; color: var(--student-deep); margin-bottom: 14px; letter-spacing: 0.09em; text-transform: uppercase; font-weight: 700; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+
+  /* Controls */
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .ctrl-label { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+  .ctrl-label .val { font-family: 'JetBrains Mono', monospace; color: var(--student-deep); font-size: 13px; font-weight: 700; }
+  input[type=range] { width: 100%; accent-color: var(--student); margin-bottom: 2px; }
+  .help { font-size: 11px; color: var(--ink-soft); line-height: 1.4; margin-top: 2px; }
+
+  .preset-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+  .preset { padding: 4px 8px; font-size: 11px; font-weight: 600; border: 1.5px solid var(--student); background: var(--paper); color: var(--student); border-radius: 4px; cursor: pointer; transition: all 0.15s; }
+  .preset:hover { background: var(--student); color: #fff; }
+
+  /* Canvas area */
+  .graph-wrap { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  canvas { display: block; width: 100%; }
+
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; padding: 10px 14px; border-top: 1px solid var(--line); font-size: 11px; color: var(--ink-soft); }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-swatch { width: 22px; height: 3px; border-radius: 2px; }
+  .legend-swatch.dashed { background: repeating-linear-gradient(90deg, transparent, transparent 4px, var(--color) 4px, var(--color) 8px); }
+
+  /* Stats */
+  .stats-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+  @media (max-width: 540px) { .stats-grid { grid-template-columns: 1fr; } }
+  .stat { background: var(--student-soft); border-left: 3px solid var(--student); padding: 9px 12px; border-radius: 4px; }
+  .stat .key { font-size: 10px; color: var(--student-deep); font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 3px; }
+  .stat .v   { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--ink); }
+  .stat.ok   { background: var(--ok-soft); border-left-color: var(--ok); }
+  .stat.ok .key, .stat.ok .v { color: var(--ok); }
+  .stat.warn { background: var(--warn-soft); border-left-color: var(--warn); }
+  .stat.warn .key, .stat.warn .v { color: var(--warn); }
+
+  /* Formula display */
+  .formula-box { background: #f8f8ff; border: 1px solid var(--line); border-left: 4px solid var(--student); padding: 12px 14px; border-radius: 4px; margin-top: 12px; font-size: 13px; }
+  .formula-box .ftitle { font-weight: 700; color: var(--student-deep); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .formula-box .fnum { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--ink); margin-top: 4px; word-break: break-all; }
+
+  footer { text-align: center; padding: 20px; font-size: 11px; color: var(--ink-soft); margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>&#9749; Hot Coffee Cooling — Live</h1>
+    <div class="meta">Joon Lee &nbsp;&middot;&nbsp; Pre-Calculus &nbsp;&middot;&nbsp; U4 PBA companion &nbsp;&middot;&nbsp; drag sliders to explore Newton's Law of Cooling</div>
+  </header>
+
+  <div class="grid">
+
+    <!-- ==================== LEFT: Controls ==================== -->
+    <div>
+      <div class="panel controls">
+        <h2>Controls</h2>
+
+        <div class="field">
+          <div class="ctrl-label">$T_0$ — initial temp <span class="val"><span id="T0val">180</span> °F</span></div>
+          <input type="range" id="T0" min="140" max="200" value="180" step="1">
+          <div class="help">Starting temperature of the fresh coffee.</div>
+        </div>
+
+        <div class="field">
+          <div class="ctrl-label">$T_{\text{room}}$ — room temp <span class="val"><span id="Troom_val">72</span> °F</span></div>
+          <input type="range" id="Troom" min="50" max="90" value="72" step="1">
+          <div class="help">This is the <strong>horizontal asymptote</strong> — the coffee approaches but never crosses this line.</div>
+        </div>
+
+        <div class="field">
+          <div class="ctrl-label">$k$ — cooling rate <span class="val"><span id="kval">0.025</span>/min</span></div>
+          <input type="range" id="k" min="0.005" max="0.10" value="0.025" step="0.001">
+          <div class="help">Larger $k$ = cools faster. Ceramic mug ≈ 0.012; paper cup ≈ 0.05.</div>
+        </div>
+
+        <div class="field">
+          <div class="ctrl-label">$T_1$ — target temp <span class="val"><span id="T1val">140</span> °F</span></div>
+          <input type="range" id="T1" min="75" max="175" value="140" step="1">
+          <div class="help">"How long until the coffee reaches this temperature?"</div>
+        </div>
+
+        <div class="field">
+          <div class="ctrl-label" style="margin-bottom:6px;">Presets</div>
+          <div class="preset-row">
+            <button class="preset" data-preset="pour-over">&#9749; Hot pour-over</button>
+            <button class="preset" data-preset="iced">&#129398; Iced (warming)</button>
+            <button class="preset" data-preset="ceramic">&#x1F3FA; Slow ceramic</button>
+            <button class="preset" data-preset="paper">&#128196; Fast paper cup</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formula box (numeric substitution) -->
+      <div class="panel" style="padding-top:14px;">
+        <h2>Live Formula</h2>
+        <div class="formula-box">
+          <div class="ftitle">General form</div>
+          $T(t) = T_{\text{room}} + (T_0 - T_{\text{room}})\,e^{-kt}$
+          <div class="ftitle" style="margin-top:10px;">Your current numbers</div>
+          <div class="fnum" id="formulaNum">T(t) = 72 + 108·e^(−0.025t)</div>
+        </div>
+        <div class="formula-box" style="margin-top:10px;">
+          <div class="ftitle">Solve for time to reach $T_1$</div>
+          $t = \dfrac{1}{k}\ln\!\!\left(\dfrac{T_0 - T_{\text{room}}}{T_1 - T_{\text{room}}}\right)$
+          <div class="ftitle" style="margin-top:8px;">Half-temperature-difference time</div>
+          $t_{1/2} = \dfrac{\ln 2}{k}$
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== RIGHT: Graph + Stats ==================== -->
+    <div>
+
+      <div class="panel" style="padding-bottom:0;">
+        <h2>Temperature vs. Time</h2>
+        <div class="graph-wrap">
+          <canvas id="graph" width="760" height="400"></canvas>
+        </div>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-swatch" style="background:var(--curve); height:3px;"></div>
+            <span>$T(t)$ cooling curve</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch" style="background:var(--asym); height:2px; border-top:2px dashed var(--asym); background:none;"></div>
+            <span>$T_{\text{room}}$ — asymptote</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch" style="background:var(--target-line); height:2px; border-top:2px dashed var(--target-line); background:none;"></div>
+            <span>$T_1$ — target</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch" style="background:var(--dot); width:10px; height:10px; border-radius:50%;"></div>
+            <span>Intersection point $(t^*, T_1)$</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:14px;">
+        <h2>Live Values</h2>
+        <div class="stats-grid">
+          <div class="stat" id="stat-time">
+            <div class="key">Time to reach $T_1$</div>
+            <div class="v" id="sv-time">—</div>
+          </div>
+          <div class="stat" id="stat-half">
+            <div class="key">Half-diff time $t_{1/2}$</div>
+            <div class="v" id="sv-half">—</div>
+          </div>
+          <div class="stat" id="stat-diff">
+            <div class="key">Current gap $T(t^*) - T_{\text{room}}$</div>
+            <div class="v" id="sv-diff">—</div>
+          </div>
+          <div class="stat" id="stat-t60">
+            <div class="key">$T(60\text{ min})$</div>
+            <div class="v" id="sv-t60">—</div>
+          </div>
+          <div class="stat" id="stat-t120">
+            <div class="key">$T(120\text{ min})$</div>
+            <div class="v" id="sv-t120">—</div>
+          </div>
+          <div class="stat" id="stat-asymptote">
+            <div class="key">Horizontal asymptote</div>
+            <div class="v" id="sv-asym">—</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>Newton School &nbsp;&middot;&nbsp; Joon Lee &nbsp;&middot;&nbsp; U4 PBA — Hot Coffee Cooling companion &nbsp;&middot;&nbsp; 2026-05-13</footer>
+
+</div>
+
+<script>
+// =====================================================
+// State
+// =====================================================
+const S = { T0: 180, Troom: 72, k: 0.025, T1: 140 };
+
+const presets = {
+  'pour-over': { T0: 180, Troom: 72, k: 0.025, T1: 140 },
+  'iced':      { T0:  38, Troom: 75, k: 0.035, T1:  60 },
+  'ceramic':   { T0: 180, Troom: 72, k: 0.012, T1: 140 },
+  'paper':     { T0: 180, Troom: 72, k: 0.050, T1: 140 }
+};
+
+// =====================================================
+// Elements
+// =====================================================
+const el = id => document.getElementById(id);
+const T0In     = el('T0'),    Troom_In  = el('Troom'),
+      kIn      = el('k'),     T1In      = el('T1');
+const T0Val    = el('T0val'), Troom_Val = el('Troom_val'),
+      kVal     = el('kval'),  T1Val     = el('T1val');
+const canvas   = el('graph');
+const ctx      = canvas.getContext('2d');
+const formulaN = el('formulaNum');
+
+// Stats
+const sv = id => el('sv-' + id);
+const st = id => el('stat-' + id);
+
+// =====================================================
+// Physics helpers
+// =====================================================
+function T(t, s) {
+  return s.Troom + (s.T0 - s.Troom) * Math.exp(-s.k * t);
+}
+function timeToReach(T1, s) {
+  const num = s.T0 - s.Troom;
+  const den = T1  - s.Troom;
+  if (den <= 0 || num <= 0 || (num / den) <= 0) return null; // unreachable or warming past target
+  if (T1 >= s.T0 && s.T0 > s.Troom) return null; // target above initial (hot coffee)
+  if (T1 <= s.T0 && s.T0 < s.Troom) return null; // target below initial (warming)
+  return (1 / s.k) * Math.log(num / den);
+}
+function halfDiffTime(s) { return Math.log(2) / s.k; }
+
+// =====================================================
+// Canvas drawing
+// =====================================================
+function drawGraph() {
+  const W = canvas.width, H = canvas.height;
+  const PAD = { l: 60, r: 30, t: 30, b: 50 };
+  const plotW = W - PAD.l - PAD.r;
+  const plotH = H - PAD.t - PAD.b;
+
+  // Decide x range: enough to see the curve flatten toward asymptote
+  // Show until T(t) is within 1°F of Troom or 120 min, whichever is smaller
+  const tMaxRaw = Math.max(60, Math.ceil((1 / S.k) * Math.log(Math.abs(S.T0 - S.Troom) / 2.0)));
+  const tMax = Math.min(Math.max(tMaxRaw, 60), 200);
+  const tMin = 0;
+
+  // y range: a bit above T0 and a bit below Troom
+  const yMin = Math.min(S.Troom, S.T0) - 15;
+  const yMax = Math.max(S.Troom, S.T0) + 20;
+
+  const xPx = t  => PAD.l + ((t  - tMin) / (tMax - tMin)) * plotW;
+  const yPx = tv => PAD.t + ((yMax - tv) / (yMax - yMin)) * plotH;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // ---- background ----
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, W, H);
+
+  // ---- grid lines ----
+  ctx.strokeStyle = '#eee';
+  ctx.lineWidth = 1;
+  // x-grid (every 10 min)
+  for (let t = 0; t <= tMax; t += 10) {
+    const x = xPx(t);
+    ctx.beginPath(); ctx.moveTo(x, PAD.t); ctx.lineTo(x, PAD.t + plotH); ctx.stroke();
+  }
+  // y-grid (every 10°F)
+  for (let tv = Math.ceil(yMin / 10) * 10; tv <= yMax; tv += 10) {
+    const y = yPx(tv);
+    ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(PAD.l + plotW, y); ctx.stroke();
+  }
+
+  // ---- axes ----
+  ctx.strokeStyle = '#999';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(PAD.l, PAD.t); ctx.lineTo(PAD.l, PAD.t + plotH); ctx.stroke(); // y-axis
+  ctx.beginPath(); ctx.moveTo(PAD.l, PAD.t + plotH); ctx.lineTo(PAD.l + plotW, PAD.t + plotH); ctx.stroke(); // x-axis
+
+  // ---- axis labels ----
+  ctx.fillStyle = '#555';
+  ctx.font = '12px Inter, system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  // x-axis tick labels
+  for (let t = 0; t <= tMax; t += 20) {
+    ctx.fillText(t, xPx(t), PAD.t + plotH + 18);
+  }
+  ctx.fillText('Time (min)', PAD.l + plotW / 2, H - 6);
+
+  // y-axis tick labels
+  ctx.textAlign = 'right';
+  for (let tv = Math.ceil(yMin / 10) * 10; tv <= yMax; tv += 10) {
+    ctx.fillText(tv, PAD.l - 6, yPx(tv) + 4);
+  }
+  // y-axis title
+  ctx.save();
+  ctx.translate(14, PAD.t + plotH / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = 'center';
+  ctx.fillText('Temperature (°F)', 0, 0);
+  ctx.restore();
+
+  // ---- horizontal asymptote: T_room ----
+  const yA = yPx(S.Troom);
+  ctx.strokeStyle = '#a29bfe';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([8, 5]);
+  ctx.beginPath(); ctx.moveTo(PAD.l, yA); ctx.lineTo(PAD.l + plotW, yA); ctx.stroke();
+  ctx.setLineDash([]);
+  // label
+  ctx.fillStyle = '#5a4fcf';
+  ctx.font = 'bold 11px Inter, system-ui, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('T_room = ' + S.Troom + '°F  (asymptote)', PAD.l + 6, yA - 5);
+
+  // ---- target temp line: T1 ----
+  const T1valid = S.T1 > S.Troom && S.T1 < S.T0 || S.T1 < S.Troom && S.T1 > S.T0;
+  if (T1valid) {
+    const yT1 = yPx(S.T1);
+    ctx.strokeStyle = '#f39c12';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.moveTo(PAD.l, yT1); ctx.lineTo(PAD.l + plotW, yT1); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#d68910';
+    ctx.font = 'bold 11px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('T₁ = ' + S.T1 + '°F', PAD.l + plotW - 4, yT1 - 5);
+  }
+
+  // ---- cooling curve ----
+  ctx.strokeStyle = '#c0392b';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  let first = true;
+  const steps = 400;
+  for (let i = 0; i <= steps; i++) {
+    const t = tMin + (tMax - tMin) * i / steps;
+    const tv = T(t, S);
+    const x = xPx(t), y = yPx(tv);
+    if (first) { ctx.moveTo(x, y); first = false; }
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // ---- intersection dot ----
+  const t_star = timeToReach(S.T1, S);
+  if (t_star !== null && t_star >= 0 && t_star <= tMax) {
+    const xDot = xPx(t_star), yDot = yPx(S.T1);
+    // vertical dashed line down to x-axis
+    ctx.strokeStyle = '#e74c3c';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath(); ctx.moveTo(xDot, yDot); ctx.lineTo(xDot, PAD.t + plotH); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // dot on curve
+    ctx.fillStyle = '#e74c3c';
+    ctx.beginPath();
+    ctx.arc(xDot, yDot, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // label
+    ctx.fillStyle = '#c0392b';
+    ctx.font = 'bold 11px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    const labelY = yDot < PAD.t + plotH - 36 ? yDot - 14 : yDot + 20;
+    ctx.fillText('t* = ' + t_star.toFixed(1) + ' min', xDot, labelY);
+  }
+
+  // ---- animated dot on curve (t = animT) ----
+  const tAnim = (animT % (tMax * 60)) / 60;  // maps 0..tMax*60 frames → 0..tMax min
+  const tvAnim = T(tAnim, S);
+  if (tAnim <= tMax) {
+    const xA = xPx(tAnim), yA2 = yPx(tvAnim);
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(xA, yA2, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#e74c3c';
+    ctx.beginPath(); ctx.arc(xA, yA2, 5, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+// =====================================================
+// Stats update
+// =====================================================
+function updateStats() {
+  const t_star = timeToReach(S.T1, S);
+  const t_half = halfDiffTime(S);
+  const t60    = T(60,  S);
+  const t120   = T(120, S);
+  const diff   = t_star !== null ? (T(t_star, S) - S.Troom) : null;
+
+  // time to T1
+  if (t_star !== null && t_star >= 0) {
+    sv('time').textContent = t_star.toFixed(1) + ' min';
+    st('time').className = 'stat ok';
+  } else {
+    sv('time').textContent = 'Not reachable';
+    st('time').className = 'stat warn';
+  }
+
+  // half diff time
+  sv('half').textContent = t_half.toFixed(1) + ' min';
+  st('half').className = 'stat';
+
+  // diff at t*
+  if (diff !== null) {
+    sv('diff').textContent = diff.toFixed(1) + ' °F above T_room';
+    st('diff').className = 'stat';
+  } else {
+    sv('diff').textContent = '—';
+    st('diff').className = 'stat';
+  }
+
+  sv('t60').textContent  = t60.toFixed(1)  + ' °F';
+  sv('t120').textContent = t120.toFixed(1) + ' °F';
+
+  st('t60').className  = t60  > S.Troom + 1 ? 'stat ok' : 'stat';
+  st('t120').className = t120 > S.Troom + 1 ? 'stat ok' : 'stat';
+
+  sv('asym').textContent = S.Troom + ' °F';
+  st('asymptote').className = 'stat ok';
+}
+
+// =====================================================
+// Formula display
+// =====================================================
+function updateFormula() {
+  const diff = S.T0 - S.Troom;
+  const kStr = S.k.toFixed(3);
+  formulaN.textContent = `T(t) = ${S.Troom} + ${diff}·e^(−${kStr}t)`;
+}
+
+// =====================================================
+// Sync state from inputs
+// =====================================================
+function syncFromInputs() {
+  S.T0    = +T0In.value;
+  S.Troom = +Troom_In.value;
+  S.k     = +kIn.value;
+  S.T1    = +T1In.value;
+  T0Val.textContent    = S.T0;
+  Troom_Val.textContent = S.Troom;
+  kVal.textContent     = S.k.toFixed(3);
+  T1Val.textContent    = S.T1;
+}
+
+function applyPreset(p) {
+  const pr = presets[p]; if (!pr) return;
+  S.T0 = pr.T0; S.Troom = pr.Troom; S.k = pr.k; S.T1 = pr.T1;
+  T0In.value = S.T0; Troom_In.value = S.Troom; kIn.value = S.k; T1In.value = S.T1;
+  T0Val.textContent = S.T0; Troom_Val.textContent = S.Troom;
+  kVal.textContent  = S.k.toFixed(3); T1Val.textContent = S.T1;
+}
+
+// =====================================================
+// Animation loop
+// =====================================================
+let animT = 0;
+function loop() {
+  animT++;
+  drawGraph();
+  updateStats();
+  updateFormula();
+  requestAnimationFrame(loop);
+}
+
+// =====================================================
+// Event listeners
+// =====================================================
+[T0In, Troom_In, kIn, T1In].forEach(el => el.addEventListener('input', syncFromInputs));
+document.querySelectorAll('.preset').forEach(btn => {
+  btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+});
+
+// Hi-DPI canvas
+(function scaleDPI() {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width  = (rect.width  || 760) * dpr;
+  canvas.height = (rect.height || 400) * dpr;
+  ctx.scale(dpr, dpr);
+  canvas.style.width  = (rect.width  || 760) + 'px';
+  canvas.style.height = (rect.height || 400) + 'px';
+})();
+
+syncFromInputs();
+loop();
+</script>
+</body>
+</html>

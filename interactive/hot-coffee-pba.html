@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hot Coffee PBA · Joon Lee · Newton School</title>
+<script>
+// MathJax config — load TeX-SVG inline
+window.MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: true }
+};
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+/* ─── RESET + TOKENS ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --violet:      #a29bfe;
+  --violet-deep: #5a4fcf;
+  --violet-glow: rgba(162,155,254,0.25);
+  --violet-dim:  rgba(162,155,254,0.12);
+  --bg:          #0d0b1a;
+  --card:        #141228;
+  --card2:       #1c1836;
+  --border:      rgba(162,155,254,0.18);
+  --text:        #e8e6ff;
+  --muted:       #8e8aaa;
+  --hot:         #ff6b6b;
+  --warm:        #ffd93d;
+  --safe:        #6bcb77;
+  --c1:          #a29bfe; /* PerfectTemp */
+  --c2:          #74b9ff; /* TempControl */
+  --c3:          #fd79a8; /* Hot n Cold  */
+  --sans: 'Segoe UI', system-ui, sans-serif;
+}
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.55;
+  padding: 0 0 60px;
+}
+
+/* ─── HEADER ─── */
+.hero {
+  background: linear-gradient(160deg, #0d0b1a 0%, #1a1438 60%, #0d0b1a 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 55% at 50% 40%, rgba(90,79,207,0.22), transparent);
+  pointer-events: none;
+}
+.hero-tag {
+  display: inline-block;
+  font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase;
+  color: var(--violet); font-weight: 700;
+  background: var(--violet-dim); border: 1px solid var(--border);
+  border-radius: 20px; padding: 3px 12px; margin-bottom: 14px;
+}
+.hero h1 {
+  font-size: clamp(26px, 5vw, 42px); font-weight: 700;
+  line-height: 1.1; letter-spacing: -0.02em;
+}
+.hero h1 span { color: var(--violet); }
+.hero-sub { margin-top: 10px; font-size: 14px; color: var(--muted); max-width: 520px; margin-left: auto; margin-right: auto; }
+
+/* ─── LAYOUT ─── */
+.wrap { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+.section { margin-top: 36px; }
+.section-head {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 18px;
+}
+.section-head .icon { font-size: 22px; }
+.section-head h2 { font-size: 16px; font-weight: 600; letter-spacing: 0.02em; color: var(--text); }
+.section-head .tag { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--violet); font-weight: 700; background: var(--violet-dim); border-radius: 4px; padding: 2px 7px; }
+
+/* ─── GLASS CARD ─── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(162,155,254,0.06), transparent);
+  pointer-events: none;
+}
+.card-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+@media (max-width: 600px) { .card-row { grid-template-columns: 1fr; } }
+
+/* ─── CONTAINER SPEC CARDS ─── */
+.spec-card {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px 18px;
+  transition: box-shadow 0.2s;
+}
+.spec-card:hover { box-shadow: 0 0 20px var(--violet-glow); }
+.spec-card.c1 { border-color: rgba(162,155,254,0.35); }
+.spec-card.c2 { border-color: rgba(116,185,255,0.35); }
+.spec-card.c3 { border-color: rgba(253,121,168,0.35); }
+.spec-title { font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+.spec-card.c1 .spec-title { color: var(--c1); }
+.spec-card.c2 .spec-title { color: var(--c2); }
+.spec-card.c3 .spec-title { color: var(--c3); }
+.spec-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.spec-row span:last-child { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.k-badge { display: inline-block; margin-top: 8px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; padding: 3px 8px; border-radius: 5px; }
+.spec-card.c1 .k-badge { background: rgba(162,155,254,0.15); color: var(--c1); }
+.spec-card.c2 .k-badge { background: rgba(116,185,255,0.15); color: var(--c2); }
+.spec-card.c3 .k-badge { background: rgba(253,121,168,0.15); color: var(--c3); }
+
+/* ─── CANVAS WRAPPER ─── */
+.canvas-wrap {
+  position: relative; width: 100%;
+  border-radius: 10px; overflow: hidden;
+  background: #09081a; border: 1px solid var(--border);
+}
+canvas { display: block; width: 100%; height: auto; }
+
+/* ─── LEGEND ─── */
+.legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.legend-swatch { width: 22px; height: 3px; border-radius: 2px; }
+.legend-swatch.dashed { background: repeating-linear-gradient(to right, #555 0, #555 4px, transparent 4px, transparent 8px); }
+
+/* ─── SOLVER ─── */
+.solver-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 520px) { .solver-grid { grid-template-columns: 1fr; } }
+.input-group { display: flex; flex-direction: column; gap: 5px; }
+.input-group label { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--violet); font-weight: 600; }
+.input-group input, .input-group select {
+  background: #0d0b1a; border: 1px solid var(--border); border-radius: 7px;
+  color: var(--text); font-size: 14px; padding: 8px 11px; font-family: var(--sans);
+  outline: none; transition: border-color 0.15s;
+  -webkit-appearance: none;
+}
+.input-group input:focus, .input-group select:focus { border-color: var(--violet); }
+.btn-solve {
+  background: linear-gradient(135deg, var(--violet-deep), var(--violet));
+  color: #fff; border: none; border-radius: 8px; padding: 10px 22px;
+  font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: 0.02em;
+  margin-top: 6px; transition: box-shadow 0.2s, transform 0.1s;
+}
+.btn-solve:hover { box-shadow: 0 4px 16px rgba(90,79,207,0.45); transform: translateY(-1px); }
+.btn-solve:active { transform: translateY(0); }
+
+/* ─── RESULT BOX ─── */
+.result-box {
+  background: #0d0b1a; border: 1px solid var(--border); border-radius: 8px;
+  padding: 16px 18px; margin-top: 14px; font-size: 13px; line-height: 1.8;
+  min-height: 60px;
+}
+.result-box .step { color: var(--muted); }
+.result-box .step strong { color: var(--text); }
+.result-box .answer { font-size: 18px; font-weight: 700; color: var(--violet); margin-top: 6px; }
+
+/* ─── DATA FIT ─── */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 10px; }
+.data-table th { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--violet); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--border); text-align: left; }
+.data-table td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.data-table td input {
+  background: transparent; border: none; border-bottom: 1px solid var(--border);
+  color: var(--text); font-size: 13px; width: 70px; padding: 2px 4px; text-align: right;
+  outline: none; font-family: var(--sans);
+}
+.data-table td input:focus { border-bottom-color: var(--violet); }
+.data-table .add-row { color: var(--violet); cursor: pointer; font-size: 12px; background: none; border: none; padding: 4px 8px; }
+.data-table .add-row:hover { text-decoration: underline; }
+.data-table .del-row { color: var(--hot); cursor: pointer; font-size: 11px; background: none; border: none; padding: 2px 6px; opacity: 0.6; }
+.data-table .del-row:hover { opacity: 1; }
+
+/* ─── STEAM ANIM ─── */
+.steam-canvas-wrap { position: relative; height: 80px; overflow: hidden; }
+#steamCanvas { display: block; width: 100%; height: 80px; }
+
+/* ─── ZONE BAND ─── */
+.zone-info { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.zone-pill { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+.zone-pill.hot  { background: rgba(255,107,107,0.18); color: var(--hot); }
+.zone-pill.ok   { background: rgba(107,203,119,0.18); color: var(--safe); }
+.zone-pill.cold { background: rgba(100,120,255,0.18); color: #74b9ff; }
+
+/* ─── HIGHLIGHT BUTTON ─── */
+.highlight-btns { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+.hbtn {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.04em; padding: 5px 12px;
+  border-radius: 6px; cursor: pointer; border: 1px solid transparent;
+  transition: all 0.15s;
+}
+.hbtn.c1 { background: rgba(162,155,254,0.12); color: var(--c1); border-color: rgba(162,155,254,0.3); }
+.hbtn.c2 { background: rgba(116,185,255,0.12); color: var(--c2); border-color: rgba(116,185,255,0.3); }
+.hbtn.c3 { background: rgba(253,121,168,0.12); color: var(--c3); border-color: rgba(253,121,168,0.3); }
+.hbtn:hover { filter: brightness(1.25); }
+
+/* ─── RESIDUAL ─── */
+.residual-note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+/* ─── TABS ─── */
+.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+.tab { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; padding: 9px 16px;
+  cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.15s; }
+.tab.active { color: var(--violet); border-bottom-color: var(--violet); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 500px) {
+  .card { padding: 16px; }
+  .hero { padding: 28px 16px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── HERO ─── -->
+<div class="hero">
+  <div class="wrap">
+    <div class="hero-tag">Newton School · U4 PBA</div>
+    <h1>&#9749; Hot Coffee <span>PBA</span></h1>
+    <p class="hero-sub">Newton's Law of Cooling — which container keeps your coffee drinkable the longest? Analyze all three, fit the math, and make your case.</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ─── SECTION 1: THE MISSION ─── -->
+  <div class="section">
+    <div class="section-head">
+      <span class="icon">&#127775;</span>
+      <h2>The Mission</h2>
+      <span class="tag">PBA Brief</span>
+    </div>
+    <div class="card">
+      <p style="font-size:14px; color:var(--muted); margin-bottom:12px;">Your fast-food company needs a coffee container. It must:</p>
+      <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;">
+        <div style="display:flex; align-items:center; gap:10px; font-size:14px;">
+          <span style="font-size:18px;">&#9889;</span>
+          <span>Cool quickly from <strong>200°F</strong> down to <strong>130°F</strong></span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; font-size:14px;">
+          <span style="font-size:18px;">&#8987;</span>
+          <span>Stay between <strong>110°F</strong> and <strong>130°F</strong> as long as possible</span>
+        </div>
+      </div>
+      <div class="zone-info">
+        <div class="zone-pill hot">Above 130°F — too hot (burn risk)</div>
+        <div class="zone-pill ok">110°F – 130°F — drinkable zone</div>
+        <div class="zone-pill cold">Below 110°F — too cold</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SECTION 2: CONTAINER SPECS ─── -->
+  <div class="section">
+    <div class="section-head">
+      <span class="icon">&#128203;</span>
+      <h2>Container Specifications</h2>
+      <span class="tag">Given Data</span>
+    </div>
+    <div class="card-row">
+      <div class="spec-card c1">
+        <div class="spec-title">PerfectTemp Co.</div>
+        <div class="spec-row"><span>Initial temp</span><span>200°F</span></div>
+        <div class="spec-row"><span>Room temp $T_a$</span><span>70°F</span></div>
+        <div class="spec-row"><span>Cools to 100°F in</span><span>30 min</span></div>
+        <div class="k-badge">k = 0.0489 min⁻¹</div>
+      </div>
+      <div class="spec-card c2">
+        <div class="spec-title">TempControl Co.</div>
+        <div class="spec-row"><span>Initial temp</span><span>200°F</span></div>
+        <div class="spec-row"><span>Room temp $T_a$</span><span>60°F</span></div>
+        <div class="spec-row"><span>Cools to 110°F in</span><span>25 min</span></div>
+        <div class="k-badge">k = 0.0412 min⁻¹</div>
+      </div>
+      <div class="spec-card c3">
+        <div class="spec-title">Hot 'n' Cold Co.</div>
+        <div class="spec-row"><span>Initial temp</span><span>200°F</span></div>
+        <div class="spec-row"><span>Room temp $T_a$</span><span>65°F</span></div>
+        <div class="spec-row"><span>Cools to 120°F in</span><span>20 min</span></div>
+        <div class="k-badge">k = 0.0449 min⁻¹</div>
+      </div>
+    </div>
+    <p style="font-size:12px; color:var(--muted); margin-top:8px;">
+      Formula used: $\displaystyle k = -\frac{\ln\!\left(\frac{u_f - T_a}{u_0 - T_a}\right)}{t}$
+    </p>
+  </div>
+
+  <!-- ─── SECTION 3: COMPARISON GRAPH ─── -->
+  <div class="section">
+    <div class="section-head">
+      <span class="icon">&#128200;</span>
+      <h2>Cooling Curves — All Three Containers</h2>
+      <span class="tag">Comparison</span>
+    </div>
+    <div class="card" style="padding:16px 18px 20px;">
+      <div class="steam-canvas-wrap">
+        <canvas id="steamCanvas"></canvas>
+      </div>
+      <div class="canvas-wrap" style="margin-top:4px;">
+        <canvas id="mainChart" width="860" height="440"></canvas>
+      </div>
+      <div class="legend" style="margin-top:14px;">
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--c1)"></div> PerfectTemp (k=0.0489)</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--c2)"></div> TempControl (k=0.0412)</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--c3)"></div> Hot 'n' Cold (k=0.0449)</div>
+        <div class="legend-item"><div class="legend-swatch dashed"></div> Drinkable zone (110–130°F)</div>
+      </div>
+      <div class="highlight-btns">
+        <button class="hbtn c1" onclick="highlightContainer(0)">Highlight PerfectTemp</button>
+        <button class="hbtn c2" onclick="highlightContainer(1)">Highlight TempControl</button>
+        <button class="hbtn c3" onclick="highlightContainer(2)">Highlight Hot 'n' Cold</button>
+        <button class="hbtn" style="background:rgba(255,255,255,0.05); color:var(--muted); border-color:var(--border);" onclick="highlightContainer(-1)">Show All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SECTION 4: TIME-TO-TEMP SOLVER ─── -->
+  <div class="section">
+    <div class="section-head">
+      <span class="icon">&#9201;</span>
+      <h2>Time-to-Temperature Solver</h2>
+      <span class="tag">Step-by-Step</span>
+    </div>
+    <div class="card">
+      <div class="solver-grid">
+        <div class="input-group">
+          <label>Container</label>
+          <select id="solverContainer">
+            <option value="0">PerfectTemp (k=0.0489, $T_a$=70)</option>
+            <option value="1">TempControl (k=0.0412, $T_a$=60)</option>
+            <option value="2">Hot 'n' Cold (k=0.0449, $T_a$=65)</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Target Temperature (°F)</label>
+          <input type="number" id="solverTarget" value="130" min="62" max="199" step="1">
+        </div>
+      </div>
+      <button class="btn-solve" onclick="runSolver()" style="margin-top:14px;">Solve — show all steps</button>
+      <div class="result-box" id="solverResult">
+        <span style="color:var(--muted);">Enter a target temperature and click Solve.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SECTION 5: DRINKABLE ZONE ANALYSIS ─── -->
+  <div class="section">
+    <div class="section-head">
+      <span class="icon">&#9745;</span>
+      <h2>Drinkable Zone Analysis</h2>
+      <span class="tag">110°F – 130°F Duration</span>
+    </div>
+    <div class="card" id="drinkableCard">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+  <!-- ─── SECTION 6: FIT YOUR OWN DATA ─── -->
+  <div class="section">
+    <div class="section-head">
+      <span class="icon">&#128202;</span>
+      <h2>Fit Your Own Data</h2>
+      <span class="tag">Regression</span>
+    </div>
+    <div class="card">
+      <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">
+        Enter $(t, T)$ pairs from your own experiment. This tool linearises with $\ln(T - T_a)$, runs least-squares regression, and extracts your <em>k</em>.
+      </p>
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab(event,'tabData')">Enter Data</div>
+        <div class="tab" onclick="switchTab(event,'tabFitChart')">Fit + Residuals</div>
+      </div>
+
+      <div class="tab-panel active" id="tabData">
+        <div style="margin-bottom:10px;">
+          <label style="font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--violet); font-weight:600;">Room Temperature $T_a$ (°F)</label>
+          <input type="number" id="fitTa" value="70" style="display:block; margin-top:4px; background:#0d0b1a; border:1px solid var(--border); border-radius:6px; color:var(--text); font-size:14px; padding:7px 10px; width:120px; outline:none; font-family:var(--sans);">
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Time $t$ (min)</th>
+              <th>Temp $T$ (°F)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="dataBody">
+            <tr><td><input type="number" value="0"></td><td><input type="number" value="200"></td><td><button class="del-row" onclick="delRow(this)">✕</button></td></tr>
+            <tr><td><input type="number" value="5"></td><td><input type="number" value="178"></td><td><button class="del-row" onclick="delRow(this)">✕</button></td></tr>
+            <tr><td><input type="number" value="10"></td><td><input type="number" value="158"></td><td><button class="del-row" onclick="delRow(this)">✕</button></td></tr>
+            <tr><td><input type="number" value="15"></td><td><input type="number" value="141"></td><td><button class="del-row" onclick="delRow(this)">✕</button></td></tr>
+            <tr><td><input type="number" value="20"></td><td><input type="number" value="127"></td><td><button class="del-row" onclick="delRow(this)">✕</button></td></tr>
+            <tr><td><input type="number" value="25"></td><td><input type="number" value="115"></td><td><button class="del-row" onclick="delRow(this)">✕</button></td></tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" style="padding:6px 8px;">
+                <button class="add-row" onclick="addRow()">+ Add row</button>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+        <button class="btn-solve" onclick="runFit()">Run Fit</button>
+        <div class="result-box" id="fitResult" style="margin-top:12px;">
+          <span style="color:var(--muted);">Click Run Fit to compute your k.</span>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tabFitChart">
+        <div class="canvas-wrap" style="margin-bottom:14px;">
+          <canvas id="fitChart" width="860" height="360"></canvas>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="residChart" width="860" height="200"></canvas>
+        </div>
+        <p class="residual-note">The residual plot should look random (no pattern) if the model fits well.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── FOOTER ─── -->
+  <div style="margin-top:50px; text-align:center; font-size:12px; color:var(--muted);">
+    <div style="color:var(--violet); font-weight:700; margin-bottom:4px;">Newton School · U4 PBA</div>
+    <div>Joon Lee · Pre-Calculus · Spring 2026 · Mr. Kenny</div>
+    <div style="margin-top:4px;">Newton's Law of Cooling: $u(t) = T_a + (u_0 - T_a)\,e^{-kt}$</div>
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+/* ════════════════════════════════════════════════
+   CONTAINER DATA
+════════════════════════════════════════════════ */
+const CONTAINERS = [
+  { name: 'PerfectTemp', k: 0.0489, Ta: 70,  T0: 200, color: '#a29bfe', tEnd: 30, Tf: 100 },
+  { name: 'TempControl', k: 0.0412, Ta: 60,  T0: 200, color: '#74b9ff', tEnd: 25, Tf: 110 },
+  { name: 'Hot \'n\' Cold', k: 0.0449, Ta: 65, T0: 200, color: '#fd79a8', tEnd: 20, Tf: 120 },
+];
+const T_HIGH = 130, T_LOW = 110;
+let highlightIdx = -1;
+
+/* temp at time t */
+function u(c, t) { return c.Ta + (c.T0 - c.Ta) * Math.exp(-c.k * t); }
+
+/* time to reach target temp */
+function tAt(c, T) {
+  if (T <= c.Ta) return Infinity;
+  if (T >= c.T0) return 0;
+  return -Math.log((T - c.Ta) / (c.T0 - c.Ta)) / c.k;
+}
+
+/* ════════════════════════════════════════════════
+   STEAM PARTICLES
+════════════════════════════════════════════════ */
+const steamCanvas = document.getElementById('steamCanvas');
+const sCtx = steamCanvas.getContext('2d');
+steamCanvas.width = steamCanvas.offsetWidth * (window.devicePixelRatio || 1) || 860;
+steamCanvas.height = 80 * (window.devicePixelRatio || 1);
+const particles = Array.from({length: 28}, (_, i) => ({
+  x: (i / 28) * steamCanvas.width,
+  y: steamCanvas.height * (0.5 + Math.random() * 0.5),
+  vx: (Math.random() - 0.5) * 0.4,
+  vy: -(0.3 + Math.random() * 0.5),
+  life: Math.random(),
+  size: 2 + Math.random() * 4,
+}));
+
+function animateSteam() {
+  sCtx.clearRect(0, 0, steamCanvas.width, steamCanvas.height);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy; p.life += 0.008;
+    if (p.life >= 1) {
+      p.x = Math.random() * steamCanvas.width;
+      p.y = steamCanvas.height;
+      p.life = 0;
+      p.vx = (Math.random() - 0.5) * 0.4;
+      p.vy = -(0.3 + Math.random() * 0.5);
+    }
+    const alpha = Math.sin(p.life * Math.PI) * 0.45;
+    const r = p.size * (1 + p.life * 1.5);
+    const grad = sCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
+    grad.addColorStop(0, `rgba(162,155,254,${alpha})`);
+    grad.addColorStop(1, 'rgba(162,155,254,0)');
+    sCtx.beginPath();
+    sCtx.arc(p.x, p.y, r, 0, Math.PI * 2);
+    sCtx.fillStyle = grad;
+    sCtx.fill();
+  });
+  requestAnimationFrame(animateSteam);
+}
+animateSteam();
+
+/* ════════════════════════════════════════════════
+   MAIN CHART
+════════════════════════════════════════════════ */
+const mainCanvas = document.getElementById('mainChart');
+const mCtx = mainCanvas.getContext('2d');
+
+function drawMain() {
+  const W = mainCanvas.width, H = mainCanvas.height;
+  const PAD = { left: 54, right: 24, top: 24, bottom: 48 };
+  const cW = W - PAD.left - PAD.right;
+  const cH = H - PAD.top - PAD.bottom;
+  const tMax = 60, tMin = 0;
+  const yMax = 210, yMin = 55;
+
+  mCtx.clearRect(0, 0, W, H);
+
+  // BG gradient
+  const bg = mCtx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#09081a'); bg.addColorStop(1, '#0d0b1a');
+  mCtx.fillStyle = bg; mCtx.fillRect(0, 0, W, H);
+
+  const xPx = t => PAD.left + ((t - tMin) / (tMax - tMin)) * cW;
+  const yPx = T => PAD.top + ((yMax - T) / (yMax - yMin)) * cH;
+
+  // Grid lines
+  mCtx.strokeStyle = 'rgba(255,255,255,0.05)'; mCtx.lineWidth = 1;
+  for (let t = 0; t <= tMax; t += 10) {
+    mCtx.beginPath(); mCtx.moveTo(xPx(t), PAD.top); mCtx.lineTo(xPx(t), PAD.top + cH); mCtx.stroke();
+  }
+  for (let T = 60; T <= 200; T += 20) {
+    mCtx.beginPath(); mCtx.moveTo(PAD.left, yPx(T)); mCtx.lineTo(PAD.left + cW, yPx(T)); mCtx.stroke();
+  }
+
+  // Drinkable zone band
+  const y130 = yPx(130), y110 = yPx(110);
+  const dz = mCtx.createLinearGradient(0, y130, 0, y110);
+  dz.addColorStop(0, 'rgba(107,203,119,0.10)');
+  dz.addColorStop(1, 'rgba(107,203,119,0.04)');
+  mCtx.fillStyle = dz;
+  mCtx.fillRect(PAD.left, y130, cW, y110 - y130);
+  // dashed borders
+  mCtx.setLineDash([5, 5]); mCtx.strokeStyle = 'rgba(107,203,119,0.40)'; mCtx.lineWidth = 1;
+  mCtx.beginPath(); mCtx.moveTo(PAD.left, y130); mCtx.lineTo(PAD.left + cW, y130); mCtx.stroke();
+  mCtx.beginPath(); mCtx.moveTo(PAD.left, y110); mCtx.lineTo(PAD.left + cW, y110); mCtx.stroke();
+  mCtx.setLineDash([]);
+  // labels
+  mCtx.fillStyle = 'rgba(107,203,119,0.70)'; mCtx.font = '10px ' + "'Segoe UI', system-ui, sans-serif";
+  mCtx.fillText('130°F', PAD.left + cW + 4, y130 + 4);
+  mCtx.fillText('110°F', PAD.left + cW + 4, y110 + 4);
+
+  // Axes
+  mCtx.strokeStyle = 'rgba(255,255,255,0.2)'; mCtx.lineWidth = 1; mCtx.setLineDash([]);
+  mCtx.beginPath(); mCtx.moveTo(PAD.left, PAD.top); mCtx.lineTo(PAD.left, PAD.top + cH); mCtx.stroke();
+  mCtx.beginPath(); mCtx.moveTo(PAD.left, PAD.top + cH); mCtx.lineTo(PAD.left + cW, PAD.top + cH); mCtx.stroke();
+
+  // Axis labels
+  mCtx.fillStyle = 'rgba(255,255,255,0.4)'; mCtx.font = '11px ' + "'Segoe UI', system-ui, sans-serif";
+  for (let t = 0; t <= tMax; t += 10) {
+    mCtx.textAlign = 'center';
+    mCtx.fillText(t, xPx(t), PAD.top + cH + 16);
+  }
+  for (let T = 60; T <= 200; T += 20) {
+    mCtx.textAlign = 'right';
+    mCtx.fillText(T + '°', PAD.left - 6, yPx(T) + 4);
+  }
+  mCtx.textAlign = 'center';
+  mCtx.fillStyle = 'rgba(255,255,255,0.35)'; mCtx.font = '11px ' + "'Segoe UI', system-ui, sans-serif";
+  mCtx.fillText('time (minutes)', PAD.left + cW / 2, H - 6);
+  mCtx.save(); mCtx.translate(14, PAD.top + cH / 2); mCtx.rotate(-Math.PI / 2);
+  mCtx.fillText('temperature (°F)', 0, 0); mCtx.restore();
+
+  // Cooling curves
+  CONTAINERS.forEach((c, idx) => {
+    const dim = highlightIdx !== -1 && highlightIdx !== idx;
+    mCtx.strokeStyle = dim ? c.color + '28' : c.color;
+    mCtx.lineWidth = dim ? 1.5 : 2.8;
+    mCtx.shadowBlur = dim ? 0 : 10;
+    mCtx.shadowColor = c.color;
+    mCtx.beginPath();
+    for (let px = 0; px <= cW; px++) {
+      const t = tMin + (px / cW) * (tMax - tMin);
+      const T = u(c, t);
+      if (px === 0) mCtx.moveTo(xPx(t), yPx(T));
+      else mCtx.lineTo(xPx(t), yPx(T));
+    }
+    mCtx.stroke();
+    mCtx.shadowBlur = 0;
+
+    // Asymptote dashed
+    if (!dim) {
+      mCtx.setLineDash([3, 6]); mCtx.strokeStyle = c.color + '40'; mCtx.lineWidth = 1;
+      mCtx.beginPath(); mCtx.moveTo(PAD.left, yPx(c.Ta)); mCtx.lineTo(PAD.left + cW, yPx(c.Ta)); mCtx.stroke();
+      mCtx.setLineDash([]);
+    }
+
+    // Endpoint dot
+    if (!dim) {
+      const tEnd = c.tEnd, Tend = u(c, tEnd);
+      mCtx.fillStyle = c.color;
+      mCtx.beginPath(); mCtx.arc(xPx(tEnd), yPx(Tend), 4.5, 0, Math.PI * 2); mCtx.fill();
+      mCtx.fillStyle = '#0d0b1a';
+      mCtx.beginPath(); mCtx.arc(xPx(tEnd), yPx(Tend), 2, 0, Math.PI * 2); mCtx.fill();
+    }
+
+    // Drinkable zone markers (vertical ticks)
+    if (!dim) {
+      const t1 = tAt(c, T_HIGH), t2 = tAt(c, T_LOW);
+      if (t1 < tMax) {
+        mCtx.strokeStyle = c.color; mCtx.lineWidth = 1.5; mCtx.setLineDash([2, 4]);
+        mCtx.beginPath(); mCtx.moveTo(xPx(t1), yPx(T_HIGH)); mCtx.lineTo(xPx(t1), PAD.top + cH); mCtx.stroke();
+        mCtx.setLineDash([]);
+        mCtx.fillStyle = c.color; mCtx.textAlign = 'center'; mCtx.font = '9px ' + "'Segoe UI', system-ui, sans-serif";
+        mCtx.fillText(t1.toFixed(1) + 'm', xPx(t1), PAD.top + cH + 30);
+      }
+    }
+  });
+
+  // Legend in chart
+  let lx = PAD.left + 10, ly = PAD.top + 12;
+  CONTAINERS.forEach(c => {
+    mCtx.fillStyle = c.color; mCtx.beginPath(); mCtx.roundRect(lx, ly - 6, 18, 8, 2); mCtx.fill();
+    mCtx.fillStyle = 'rgba(255,255,255,0.75)'; mCtx.textAlign = 'left'; mCtx.font = '11px ' + "'Segoe UI', system-ui, sans-serif";
+    mCtx.fillText(c.name, lx + 22, ly + 1);
+    lx += mCtx.measureText(c.name).width + 46;
+  });
+}
+drawMain();
+
+function highlightContainer(idx) {
+  highlightIdx = idx;
+  drawMain();
+}
+
+/* ════════════════════════════════════════════════
+   TIME-TO-TEMP SOLVER
+════════════════════════════════════════════════ */
+function runSolver() {
+  const ci = parseInt(document.getElementById('solverContainer').value);
+  const c = CONTAINERS[ci];
+  const T = parseFloat(document.getElementById('solverTarget').value);
+  const el = document.getElementById('solverResult');
+
+  if (isNaN(T) || T <= c.Ta || T >= c.T0) {
+    el.innerHTML = `<span style="color:var(--hot);">Target must be between ${c.Ta + 1}°F and ${c.T0 - 1}°F for this container.</span>`;
+    return;
+  }
+
+  const t = tAt(c, T);
+  const kStr = c.k.toFixed(4);
+  const ratioNum = (T - c.Ta).toFixed(2);
+  const ratioDen = (c.T0 - c.Ta).toFixed(2);
+  const lnVal = Math.log((T - c.Ta) / (c.T0 - c.Ta)).toFixed(4);
+
+  el.innerHTML = `
+    <div class="step"><strong>Formula:</strong> $u(t) = T_a + (u_0 - T_a)\\,e^{-kt}$</div>
+    <div class="step" style="margin-top:6px;"><strong>Substitute:</strong> $${T} = ${c.Ta} + (${c.T0} - ${c.Ta})\\,e^{-${kStr}\\,t}$</div>
+    <div class="step" style="margin-top:6px;"><strong>Isolate exponential:</strong> $e^{-${kStr}\\,t} = \\dfrac{${T} - ${c.Ta}}{${c.T0} - ${c.Ta}} = \\dfrac{${ratioNum}}{${ratioDen}}$</div>
+    <div class="step" style="margin-top:6px;"><strong>Take natural log:</strong> $-${kStr}\\,t = \\ln\\!\\left(\\dfrac{${ratioNum}}{${ratioDen}}\\right) = ${lnVal}$</div>
+    <div class="step" style="margin-top:6px;"><strong>Solve for t:</strong> $t = \\dfrac{${lnVal}}{-${kStr}}$</div>
+    <div class="answer">t ≈ ${t.toFixed(2)} minutes</div>
+  `;
+  // Retypeset MathJax
+  if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([el]);
+}
+
+/* ════════════════════════════════════════════════
+   DRINKABLE ZONE
+════════════════════════════════════════════════ */
+function buildDrinkableCard() {
+  const el = document.getElementById('drinkableCard');
+  let html = `<p style="font-size:13px; color:var(--muted); margin-bottom:16px;">How long does each container keep the coffee in the 110–130°F safe zone?</p>`;
+  html += `<div style="display:flex; flex-direction:column; gap:12px;">`;
+
+  let best = -1, bestDur = -Infinity;
+  CONTAINERS.forEach((c, i) => {
+    const t1 = tAt(c, T_HIGH);
+    const t2 = tAt(c, T_LOW);
+    if (t2 - t1 > bestDur) { bestDur = t2 - t1; best = i; }
+  });
+
+  CONTAINERS.forEach((c, i) => {
+    const t1 = tAt(c, T_HIGH);
+    const t2 = tAt(c, T_LOW);
+    const dur = t2 - t1;
+    const pct = Math.min(100, dur / 12 * 100);
+    const isBest = i === best;
+    html += `
+      <div style="padding:14px 16px; border-radius:9px; background:var(--card2); border:1px solid ${isBest ? c.color + '60' : 'var(--border)'};">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-weight:700; color:${c.color}; font-size:14px;">${c.name}</span>
+          <span style="font-size:15px; font-weight:700; color:${c.color};">${dur.toFixed(2)} min</span>
+          ${isBest ? '<span style="font-size:10px; font-weight:700; background:rgba(107,203,119,0.2); color:var(--safe); padding:2px 8px; border-radius:4px;">BEST CHOICE</span>' : ''}
+        </div>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">
+          Enters zone at <strong style="color:var(--text);">${t1.toFixed(2)} min</strong> &rarr; exits at <strong style="color:var(--text);">${t2.toFixed(2)} min</strong>
+        </div>
+        <div style="height:8px; background:#0d0b1a; border-radius:4px; overflow:hidden;">
+          <div style="height:100%; width:${pct}%; background:${c.color}; border-radius:4px; transition:width 0.6s ease;"></div>
+        </div>
+      </div>
+    `;
+  });
+  html += `</div>`;
+  html += `<p style="font-size:12px; color:var(--muted); margin-top:14px;">All three containers cool at slightly different rates. The one with the longest time in the drinkable zone best meets the company's second criterion.</p>`;
+  el.innerHTML = html;
+}
+buildDrinkableCard();
+
+/* ════════════════════════════════════════════════
+   FIT YOUR DATA
+════════════════════════════════════════════════ */
+let fitK = null, fitT0 = null, fitTa = 70, fitData = [];
+
+function addRow() {
+  const tbody = document.getElementById('dataBody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><input type="number" value=""></td><td><input type="number" value=""></td><td><button class="del-row" onclick="delRow(this)">✕</button></td>`;
+  tbody.appendChild(tr);
+}
+function delRow(btn) {
+  const tr = btn.closest('tr');
+  if (document.querySelectorAll('#dataBody tr').length > 2) tr.remove();
+}
+
+function getTableData() {
+  const rows = document.querySelectorAll('#dataBody tr');
+  const pts = [];
+  rows.forEach(tr => {
+    const inputs = tr.querySelectorAll('input');
+    const t = parseFloat(inputs[0].value);
+    const T = parseFloat(inputs[1].value);
+    if (!isNaN(t) && !isNaN(T)) pts.push({t, T});
+  });
+  return pts;
+}
+
+function runFit() {
+  fitTa = parseFloat(document.getElementById('fitTa').value) || 70;
+  const pts = getTableData();
+  fitData = pts;
+
+  const valid = pts.filter(p => p.T > fitTa);
+  if (valid.length < 2) {
+    document.getElementById('fitResult').innerHTML = `<span style="color:var(--hot);">Need at least 2 points where T > T_a (${fitTa}°F).</span>`;
+    return;
+  }
+
+  // Linearize: ln(T - Ta) = ln(T0-Ta) - k*t  =>  y = a + bx
+  const xs = valid.map(p => p.t);
+  const ys = valid.map(p => Math.log(p.T - fitTa));
+  const n = xs.length;
+  const sx = xs.reduce((a,b)=>a+b,0), sy = ys.reduce((a,b)=>a+b,0);
+  const sxx = xs.reduce((a,b)=>a+b*b,0), sxy = xs.reduce((a,v,i)=>a+v*ys[i],0);
+  const slope = (n*sxy - sx*sy)/(n*sxx - sx*sx);
+  const intercept = (sy - slope*sx)/n;
+  fitK = -slope;
+  fitT0 = Math.exp(intercept) + fitTa;
+
+  // R²
+  const yMean = sy / n;
+  const ssTot = ys.reduce((a,v)=>a+(v-yMean)**2,0);
+  const ssRes = ys.reduce((a,v,i)=>a+(v-(intercept+slope*xs[i]))**2,0);
+  const r2 = 1 - ssRes/ssTot;
+
+  document.getElementById('fitResult').innerHTML = `
+    <div class="step"><strong>Linearized:</strong> $\\ln(T - T_a) = \\ln(u_0 - T_a) - k\\,t$</div>
+    <div class="step" style="margin-top:6px;"><strong>Regression slope:</strong> $b = ${slope.toFixed(5)}$ &rArr; $k = ${fitK.toFixed(4)}$</div>
+    <div class="step" style="margin-top:6px;"><strong>Recovered $u_0$:</strong> ${fitT0.toFixed(1)}°F (your data says ${pts[0]?.T ?? '?'}°F)</div>
+    <div class="step" style="margin-top:6px;"><strong>$R^2 = ${r2.toFixed(4)}$</strong> — ${r2 > 0.99 ? 'excellent fit!' : r2 > 0.97 ? 'good fit' : 'check your data / T_a'}</div>
+    <div class="answer">Your k ≈ ${fitK.toFixed(4)} min⁻¹</div>
+  `;
+  if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([document.getElementById('fitResult')]);
+
+  drawFitChart();
+  switchTab(null, 'tabFitChart');
+}
+
+function drawFitChart() {
+  const canvas = document.getElementById('fitChart');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const PAD = {left:54, right:24, top:20, bottom:44};
+  const cW = W - PAD.left - PAD.right, cH = H - PAD.top - PAD.bottom;
+
+  const pts = fitData.filter(p => p.T > fitTa);
+  if (pts.length < 2 || !fitK) return;
+
+  const tMax = Math.max(...pts.map(p=>p.t)) * 1.2 || 40;
+  const allTs = pts.map(p=> u({Ta:fitTa, T0:fitT0, k:fitK}, p.t));
+  const allTemps = [...pts.map(p=>p.T), ...allTs, fitTa + 1];
+  const yMin = Math.max(fitTa - 5, Math.min(...allTemps) - 10);
+  const yMax = Math.max(...allTemps) + 10;
+
+  ctx.clearRect(0, 0, W, H);
+  const bg = ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#09081a'); bg.addColorStop(1,'#0d0b1a');
+  ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+
+  const xp = t => PAD.left + (t/tMax)*cW;
+  const yp = T => PAD.top + ((yMax-T)/(yMax-yMin))*cH;
+
+  // grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 1;
+  for (let t=0; t<=tMax; t+=5) { ctx.beginPath(); ctx.moveTo(xp(t),PAD.top); ctx.lineTo(xp(t),PAD.top+cH); ctx.stroke(); }
+  for (let T=yMin; T<=yMax; T+=20) { ctx.beginPath(); ctx.moveTo(PAD.left,yp(T)); ctx.lineTo(PAD.left+cW,yp(T)); ctx.stroke(); }
+
+  // fit curve
+  ctx.strokeStyle = '#a29bfe'; ctx.lineWidth = 2.5;
+  ctx.shadowBlur = 8; ctx.shadowColor = '#a29bfe';
+  ctx.beginPath();
+  for (let px=0; px<=cW; px++) {
+    const t = (px/cW)*tMax;
+    const T = u({Ta:fitTa, T0:fitT0, k:fitK}, t);
+    if (px===0) ctx.moveTo(xp(t),yp(T)); else ctx.lineTo(xp(t),yp(T));
+  }
+  ctx.stroke(); ctx.shadowBlur=0;
+
+  // data points
+  pts.forEach(p => {
+    ctx.fillStyle = '#ffd93d';
+    ctx.beginPath(); ctx.arc(xp(p.t), yp(p.T), 5, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#0d0b1a';
+    ctx.beginPath(); ctx.arc(xp(p.t), yp(p.T), 2, 0, Math.PI*2); ctx.fill();
+  });
+
+  // axes + labels
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(PAD.left,PAD.top); ctx.lineTo(PAD.left,PAD.top+cH); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(PAD.left,PAD.top+cH); ctx.lineTo(PAD.left+cW,PAD.top+cH); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = "11px 'Segoe UI',sans-serif";
+  for (let t=0; t<=tMax; t+=10) { ctx.textAlign='center'; ctx.fillText(t, xp(t), PAD.top+cH+16); }
+  for (let T=Math.ceil(yMin/20)*20; T<=yMax; T+=20) { ctx.textAlign='right'; ctx.fillText(T+'°', PAD.left-6, yp(T)+4); }
+  ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.textAlign='center';
+  ctx.fillText('time (min)', PAD.left+cW/2, H-6);
+  ctx.save(); ctx.translate(14, PAD.top+cH/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('temp (°F)', 0, 0); ctx.restore();
+
+  // legend
+  ctx.fillStyle='#a29bfe'; ctx.textAlign='left'; ctx.font="11px 'Segoe UI',sans-serif";
+  ctx.fillRect(PAD.left+10, PAD.top+10, 20, 3);
+  ctx.fillText('Fit curve (k='+fitK.toFixed(4)+')', PAD.left+34, PAD.top+15);
+  ctx.fillStyle='#ffd93d'; ctx.beginPath(); ctx.arc(PAD.left+10+6, PAD.top+26, 4,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.fillText('Your data', PAD.left+34, PAD.top+29);
+
+  // Residual chart
+  const rCanvas = document.getElementById('residChart');
+  const rCtx = rCanvas.getContext('2d');
+  const rW = rCanvas.width, rH = rCanvas.height;
+  const rPAD = {left:54, right:24, top:20, bottom:30};
+  const rcW = rW - rPAD.left - rPAD.right, rcH = rH - rPAD.top - rPAD.bottom;
+
+  rCtx.clearRect(0,0,rW,rH);
+  rCtx.fillStyle=bg; rCtx.fillRect(0,0,rW,rH);
+
+  const residuals = pts.map(p => p.T - u({Ta:fitTa, T0:fitT0, k:fitK}, p.t));
+  const absMax = Math.max(...residuals.map(Math.abs), 1) * 1.4;
+  const rxp = t => rPAD.left + (t/tMax)*rcW;
+  const ryp = r => rPAD.top + ((absMax - r)/(2*absMax))*rcH;
+
+  // zero line
+  rCtx.strokeStyle='rgba(255,255,255,0.15)'; rCtx.lineWidth=1; rCtx.setLineDash([4,4]);
+  rCtx.beginPath(); rCtx.moveTo(rPAD.left, ryp(0)); rCtx.lineTo(rPAD.left+rcW, ryp(0)); rCtx.stroke();
+  rCtx.setLineDash([]);
+
+  // residual bars
+  pts.forEach((p, i) => {
+    const res = residuals[i];
+    const col = Math.abs(res) < 1 ? '#6bcb77' : Math.abs(res) < 3 ? '#ffd93d' : '#ff6b6b';
+    rCtx.strokeStyle = col; rCtx.lineWidth = 1.5;
+    rCtx.beginPath(); rCtx.moveTo(rxp(p.t), ryp(0)); rCtx.lineTo(rxp(p.t), ryp(res)); rCtx.stroke();
+    rCtx.fillStyle = col; rCtx.beginPath(); rCtx.arc(rxp(p.t), ryp(res), 3.5, 0, Math.PI*2); rCtx.fill();
+  });
+
+  // axis
+  rCtx.strokeStyle='rgba(255,255,255,0.2)'; rCtx.lineWidth=1;
+  rCtx.beginPath(); rCtx.moveTo(rPAD.left,rPAD.top); rCtx.lineTo(rPAD.left,rPAD.top+rcH); rCtx.stroke();
+  rCtx.beginPath(); rCtx.moveTo(rPAD.left,rPAD.top+rcH); rCtx.lineTo(rPAD.left+rcW,rPAD.top+rcH); rCtx.stroke();
+
+  rCtx.fillStyle='rgba(255,255,255,0.4)'; rCtx.font="11px 'Segoe UI',sans-serif"; rCtx.textAlign='center';
+  rCtx.fillText('Residual Plot (observed − predicted)', rPAD.left+rcW/2, rH-4);
+}
+
+/* ════════════════════════════════════════════════
+   TABS
+════════════════════════════════════════════════ */
+function switchTab(e, panelId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
+  if (e) e.target.classList.add('active');
+  else {
+    const tabs = document.querySelectorAll('.tab');
+    if (panelId === 'tabFitChart') tabs[1].classList.add('active');
+    else tabs[0].classList.add('active');
+  }
+  if (panelId === 'tabFitChart' && fitK) {
+    // redraw on next frame so canvas is visible
+    setTimeout(drawFitChart, 50);
+  }
+}
+
+/* ════════════════════════════════════════════════
+   REDRAW ON RESIZE
+════════════════════════════════════════════════ */
+window.addEventListener('resize', () => {
+  drawMain();
+  if (fitK) drawFitChart();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Newton's Law of Cooling — PBA Lecture Note (Joon Lee · 5/13)</title>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'], ['\\(','\\)']], displayMath: [['$$','$$'], ['\\[','\\]']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<style>
+/* ============================================================
+   base-print.css (inlined)
+   ============================================================ */
+@page { size: letter; margin: 0.5in; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #fafafa; }
+body { font-family: 'Century Schoolbook', 'Times New Roman', serif; color: #000; }
+.page { max-width: 720px; margin: 0 auto; padding: 70px 50px 40px 50px; background: #fff; }
+.page-break { page-break-before: always; break-before: page; }
+@media print {
+  html, body { background: #fff; }
+  .page { max-width: none; padding: 0.7in 0.6in 0.5in 0.6in; margin: 0; box-shadow: none; }
+  .problem, .answer-block, .reminder, .example, .word-problem,
+  .statement, .solution-block, .notes-block {
+    page-break-inside: avoid; break-inside: avoid;
+  }
+  .part-header, .directions, .problem-header, h1, h2, h3 {
+    page-break-after: avoid; break-after: avoid;
+  }
+  .page-break { page-break-before: always; break-before: page; }
+}
+
+/* ============================================================
+   theme-boy.css (inlined)
+   ============================================================ */
+:root {
+  --color-primary:        #1565c0;
+  --color-primary-dark:   #0d47a1;
+  --color-accent:         #00838f;
+  --color-header-border:  #1565c0;
+  --color-final-answer:   #2e7d32;
+  --color-warning:        #c62828;
+  --color-parent-note:    #283593;
+  --color-tag-bg:         transparent;
+  --color-tag-border:     #1565c0;
+  --color-tag-text:       #1565c0;
+  --color-muted:          #555;
+  --color-rule:           #ccc;
+}
+
+/* ============================================================
+   level-high.css (inlined)
+   ============================================================ */
+body { font-family: 'Source Serif Pro', 'Georgia', 'Times New Roman', serif; font-size: 10.5pt; line-height: 1.55; }
+h1, h2, h3, .part-header { font-family: 'Libre Baskerville', 'Georgia', serif; }
+.header { text-align: center; padding-bottom: 10px; margin-bottom: 16px; border-bottom: 2px solid var(--color-header-border); }
+.school-name { font-size: 9pt; letter-spacing: 4px; color: var(--color-primary); font-weight: bold; }
+.subject-tag, .key-tag {
+  display: inline-block; padding: 2px 10px; font-size: 8pt; letter-spacing: 2px;
+  margin: 5px 3px 7px 3px; font-weight: bold;
+}
+.subject-tag { border: 1.5px solid var(--color-primary); color: var(--color-primary); }
+.key-tag { border: 1.5px solid var(--color-warning); color: var(--color-warning); }
+h1 { font-size: 16pt; margin: 6px 0 8px 0; font-weight: bold; line-height: 1.3; }
+.info { display: flex; justify-content: space-between; font-size: 10pt; margin-top: 6px; }
+.standard { font-size: 8pt; font-style: italic; margin-top: 4px; color: var(--color-muted); }
+
+.part-header {
+  font-size: 13pt; font-weight: bold; color: var(--color-primary);
+  margin: 22px 0 6px 0; padding-bottom: 3px;
+  border-bottom: 1.5px solid var(--color-primary);
+}
+
+.concept-box {
+  border: 1.5px solid var(--color-accent);
+  background: transparent;
+  padding: 10px 14px;
+  margin: 12px 0;
+  font-size: 10pt;
+  border-left-width: 4px;
+}
+.concept-box .title { font-weight: bold; color: var(--color-accent); margin-bottom: 4px; }
+
+.footer { text-align: center; font-size: 8pt; color: #666; border-top: 1px solid var(--color-rule); margin-top: 20px; padding-top: 6px; }
+
+/* ============================================================
+   editor-widget components
+   ============================================================ */
+.reminder {
+  border: 1.5px solid #e65100;
+  border-left-width: 5px;
+  padding: 10px 14px;
+  margin: 14px 0 18px 0;
+  font-size: 10pt;
+  background: transparent;
+}
+.reminder .title { font-weight: bold; color: #e65100; margin-bottom: 4px; }
+
+/* Notes block (formula sheet style) */
+.notes-block {
+  border: 1.5px solid var(--color-primary);
+  border-left-width: 5px;
+  background: #f5f9ff;
+  padding: 12px 16px;
+  margin: 14px 0 18px 0;
+  font-size: 10.5pt;
+}
+.notes-block .nb-title {
+  font-weight: bold;
+  color: var(--color-primary-dark);
+  font-size: 11.5pt;
+  margin-bottom: 8px;
+  letter-spacing: 0.04em;
+}
+.notes-block .nb-subhead {
+  font-weight: bold;
+  color: var(--color-primary);
+  margin-top: 10px;
+  margin-bottom: 3px;
+}
+.notes-block ul { margin: 4px 0 4px 22px; padding: 0; }
+.notes-block li { margin: 3px 0; }
+.constants {
+  background: #fff;
+  border: 1px solid #cfd8dc;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-top: 10px;
+  font-size: 10pt;
+  line-height: 1.8;
+}
+
+/* Worked example */
+.example {
+  border: 2px solid var(--color-final-answer);
+  padding: 12px 16px;
+  margin: 14px 0;
+  background: #f8fbf8;
+}
+.example-title {
+  font-weight: bold;
+  color: var(--color-final-answer);
+  margin-bottom: 6px;
+  font-size: 11pt;
+}
+.example-problem {
+  font-size: 10.5pt;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  background: #fff;
+  border-left: 3px solid #aaa;
+}
+.example-solution {
+  border-left: 3px solid var(--color-final-answer);
+  padding-left: 12px;
+  margin-top: 8px;
+  font-size: 10pt;
+}
+.example-solution p { margin: 4px 0; }
+
+/* Problem statement + big work-space + solution */
+.problem-number {
+  display: inline-block;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: bold;
+  font-size: 11pt;
+  padding: 3px 12px;
+  border-radius: 14px;
+  margin-bottom: 8px;
+  letter-spacing: 0.04em;
+}
+.problem-title {
+  display: inline-block;
+  font-weight: bold;
+  font-size: 11.5pt;
+  color: var(--color-primary-dark);
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.statement {
+  background: #f5f5f5;
+  border-left: 4px solid #888;
+  padding: 10px 14px;
+  margin: 8px 0 10px 0;
+  font-size: 10.5pt;
+  line-height: 1.6;
+}
+.statement .label {
+  font-size: 8.5pt;
+  font-weight: bold;
+  color: #555;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.statement ol.parts { margin: 4px 0 0 22px; padding: 0; }
+.statement ol.parts li { margin: 3px 0; }
+
+/* Big work-space (for student to solve) */
+.work-space {
+  min-height: 200px;
+  margin: 8px 0 10px 4px;
+  padding: 10px;
+  border: 1px dashed #b0bec5;
+  border-radius: 3px;
+  background: #fbfcfd;
+  position: relative;
+}
+.work-space::before {
+  content: "Work space — your solution";
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  font-size: 7.5pt;
+  color: #90a4ae;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.solution-block {
+  border-left: 4px solid var(--color-final-answer);
+  background: #f7fbf7;
+  padding: 10px 14px;
+  margin: 8px 0 14px 0;
+  font-size: 10.5pt;
+  line-height: 1.65;
+}
+.solution-block .label {
+  font-size: 8.5pt;
+  font-weight: bold;
+  color: var(--color-final-answer);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.solution-block .step {
+  margin: 5px 0;
+  padding-left: 6px;
+}
+.boxed-final {
+  display: inline-block;
+  border: 1.5px solid var(--color-final-answer);
+  color: var(--color-final-answer);
+  font-weight: bold;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 10.5pt;
+  margin: 4px 0;
+}
+
+.problem-wrap {
+  margin: 18px 0 22px 0;
+}
+
+/* AP connection callout */
+.ap-callout {
+  border: 1.5px solid var(--color-accent);
+  border-left-width: 5px;
+  padding: 9px 13px;
+  margin: 12px 0;
+  font-size: 10pt;
+  background: #f0fafb;
+}
+.ap-callout .title { font-weight: bold; color: var(--color-accent); margin-bottom: 3px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ========== HEADER ========== -->
+  <div class="header">
+    <div class="school-name">NEWTON SCHOOL</div>
+    <div>
+      <span class="subject-tag">PRE-CALCULUS</span>
+      <span class="key-tag">U4 PBA</span>
+    </div>
+    <h1>Newton's Law of Cooling — Hot Coffee PBA</h1>
+    <div class="info">
+      <span><strong>Student:</strong> Joon Lee</span>
+      <span><strong>Date:</strong> May 13, 2026</span>
+    </div>
+    <div class="standard">
+      <strong>Topic:</strong> Exponential decay, horizontal asymptotes, Newton's Law of Cooling. Unit 4 PBA reference + in-class worked problems.
+    </div>
+  </div>
+
+  <!-- Kenny reminder -->
+  <div class="reminder">
+    <div class="title">☕ How to use this note</div>
+    Read the <strong>Notes</strong> section (the big formula + every variable) carefully first.
+    Then go through all three <strong>Worked Examples</strong> — follow every step.
+    Finally, attempt each <strong>Practice Problem</strong> in the dashed work-space
+    <em>before</em> reading the green solution box. The boxed green answer is the final answer to check yourself.
+  </div>
+
+  <!-- ============================================================
+       NOTES — Key Formulas
+       ============================================================ -->
+  <div class="notes-block">
+    <div class="nb-title">📘 Notes — Newton's Law of Cooling Toolkit</div>
+
+    <div class="nb-subhead">1. The Main Formula</div>
+    A hot (or cold) object placed in a room of constant temperature $T_{\text{room}}$ follows:
+    $$T(t) \;=\; T_{\text{room}} \;+\; (T_0 - T_{\text{room}})\,e^{-kt}$$
+    <ul>
+      <li>$T(t)$ = temperature at time $t$ (in °F or °C)</li>
+      <li>$T_0$ = <strong>initial temperature</strong> (at $t = 0$)</li>
+      <li>$T_{\text{room}}$ = <strong>room (ambient) temperature</strong> — this is the <em>horizontal asymptote</em></li>
+      <li>$k$ = <strong>cooling rate constant</strong> ($k > 0$; bigger $k$ = cools faster)</li>
+      <li>$t$ = time (minutes or hours — be consistent!)</li>
+    </ul>
+
+    <div class="nb-subhead">2. The Horizontal Asymptote — Why It Matters</div>
+    As $t \to \infty$, the term $e^{-kt} \to 0$, so:
+    $$\lim_{t \to \infty} T(t) \;=\; T_{\text{room}} \;+\; (T_0 - T_{\text{room}}) \cdot 0 \;=\; T_{\text{room}}$$
+    <strong>The coffee can never get colder than room temperature.</strong>
+    The graph starts at $T_0$, curves down (for hot coffee), and approaches $T_{\text{room}}$ — never touching it.
+    On your PBA: the horizontal asymptote of the graph <em>is</em> the room temperature.
+
+    <div class="nb-subhead">3. Solving for Time — "When does it reach $T_1$?"</div>
+    Set $T(t) = T_1$ and solve for $t$:
+    $$T_1 = T_{\text{room}} + (T_0 - T_{\text{room}})\,e^{-kt}$$
+    $$e^{-kt} = \frac{T_1 - T_{\text{room}}}{T_0 - T_{\text{room}}}$$
+    $$-kt = \ln\!\left(\frac{T_1 - T_{\text{room}}}{T_0 - T_{\text{room}}}\right)$$
+    $$\boxed{t \;=\; \frac{1}{k}\ln\!\left(\frac{T_0 - T_{\text{room}}}{T_1 - T_{\text{room}}}\right)}$$
+    (Flip the fraction inside to remove the negative sign — valid since $T_0 > T_1 > T_{\text{room}}$.)
+
+    <div class="nb-subhead">4. Half-Temperature-Difference Time $t_{1/2}$</div>
+    The time it takes for the <em>difference</em> $(T - T_{\text{room}})$ to be cut in half:
+    $$t_{1/2} \;=\; \frac{\ln 2}{k} \;\approx\; \frac{0.693}{k}$$
+    Analogy to radioactive half-life — same math, different context.
+
+    <div class="nb-subhead">5. Finding $k$ from Two Data Points</div>
+    If you measure temperatures $T_1$ at $t_1$ and $T_2$ at $t_2$:
+    $$e^{-k t_1} = \frac{T_1 - T_{\text{room}}}{T_0 - T_{\text{room}}}, \quad e^{-k t_2} = \frac{T_2 - T_{\text{room}}}{T_0 - T_{\text{room}}}$$
+    Divide: $\;\;e^{-k(t_2-t_1)} = \dfrac{T_2 - T_{\text{room}}}{T_1 - T_{\text{room}}}$
+    $$k = \frac{1}{t_1 - t_2}\ln\!\left(\frac{T_2 - T_{\text{room}}}{T_1 - T_{\text{room}}}\right) = \frac{1}{t_2 - t_1}\ln\!\left(\frac{T_1 - T_{\text{room}}}{T_2 - T_{\text{room}}}\right)$$
+
+    <div class="constants">
+      <strong>Typical values for context:</strong><br>
+      Room temp: $T_{\text{room}} \approx 68\text{–}72\,°\text{F}$ &nbsp;·&nbsp;
+      Fresh-brewed coffee: $T_0 \approx 175\text{–}185\,°\text{F}$ &nbsp;·&nbsp;
+      Drinkable: $T_1 \approx 130\text{–}140\,°\text{F}$<br>
+      Ceramic mug: $k \approx 0.010\text{–}0.015/\text{min}$ &nbsp;·&nbsp;
+      Paper cup: $k \approx 0.04\text{–}0.06/\text{min}$
+    </div>
+  </div>
+
+  <!-- AP connection -->
+  <div class="ap-callout">
+    <div class="title">Why is the horizontal asymptote exactly $T_{\text{room}}$?</div>
+    The exponential factor $e^{-kt}$ approaches <strong>zero</strong> as $t \to \infty$ (because the exponent $-kt \to -\infty$).
+    So the whole $(T_0 - T_{\text{room}})\,e^{-kt}$ piece vanishes — what's left is just $T_{\text{room}}$.
+    Geometrically: the graph is the parent curve $e^{-kt}$ scaled and shifted <em>up</em> by $T_{\text{room}}$.
+    The "floor" moves from 0 to $T_{\text{room}}$. That shift <em>is</em> the asymptote.
+  </div>
+
+  <!-- ============================================================
+       EXAMPLES
+       ============================================================ -->
+  <div class="part-header">Worked Examples</div>
+
+  <div class="example">
+    <div class="example-title">Example 1 — Predict temperature at a given time</div>
+    <div class="example-problem">
+      A freshly poured mug of coffee starts at $T_0 = 180\,°\text{F}$.
+      The room temperature is $T_{\text{room}} = 72\,°\text{F}$.
+      The cooling constant is $k = 0.025\,\text{min}^{-1}$.
+      What is the temperature after 30 minutes?
+    </div>
+    <div class="example-solution">
+      <p><strong>Setup.</strong> We know $T_0 = 180$, $T_{\text{room}} = 72$, $k = 0.025$, $t = 30$.</p>
+      <p><strong>Plug in.</strong>
+        $T(30) = 72 + (180 - 72)\,e^{-0.025 \times 30}$<br>
+        $\phantom{T(30)} = 72 + 108\,e^{-0.75}$<br>
+        $\phantom{T(30)} = 72 + 108 \times 0.4724$<br>
+        $\phantom{T(30)} = 72 + 51.02 \approx 123.0\,°\text{F}.$
+      </p>
+      <p><strong>Answer.</strong>
+        <span class="boxed-final">$T(30) \approx 123\,°\text{F}$</span>
+      </p>
+      <p style="color:#555; font-size:9.5pt;"><em>Sanity check.</em> After 30 min the coffee went from 180 °F down to ~123 °F — cooled by 57 °F. Still hotter than room temp (72 °F). Makes sense.</p>
+    </div>
+  </div>
+
+  <div class="example">
+    <div class="example-title">Example 2 — Find $k$ from two measurements</div>
+    <div class="example-problem">
+      You measure a cup of coffee at $t = 0$ min: $T_0 = 175\,°\text{F}$.
+      At $t = 10$ min: $T = 155\,°\text{F}$.
+      At $t = 20$ min: $T = 138\,°\text{F}$.
+      Room temperature is $T_{\text{room}} = 70\,°\text{F}$.
+      Find the cooling constant $k$.
+    </div>
+    <div class="example-solution">
+      <p><strong>Strategy.</strong> Use the formula at $t = 10$:</p>
+      <p>$155 = 70 + (175 - 70)\,e^{-k \cdot 10}$</p>
+      <p>$155 - 70 = 105\,e^{-10k} \;\Rightarrow\; 85 = 105\,e^{-10k}$</p>
+      <p>$e^{-10k} = \dfrac{85}{105} = 0.8095$</p>
+      <p>$-10k = \ln(0.8095) = -0.2113 \;\Rightarrow\; k = 0.02113\,\text{min}^{-1}.$</p>
+      <p><strong>Verify at $t = 20$.</strong>
+        $T(20) = 70 + 105\,e^{-0.02113 \times 20} = 70 + 105 \times e^{-0.4226} = 70 + 105 \times 0.6551 = 70 + 68.8 \approx 138.8\,°\text{F}.$
+        Matches the given $138\,°\text{F}$.
+      </p>
+      <p><strong>Answer.</strong>
+        <span class="boxed-final">$k \approx 0.0211\,\text{min}^{-1}$</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="example">
+    <div class="example-title">Example 3 — Solve for time</div>
+    <div class="example-problem">
+      Coffee starts at $T_0 = 180\,°\text{F}$. Room is $72\,°\text{F}$.
+      The cooling constant $k = 0.025\,\text{min}^{-1}$.
+      How long until the coffee cools to a drinkable $140\,°\text{F}$?
+    </div>
+    <div class="example-solution">
+      <p><strong>Set up the equation.</strong> $140 = 72 + (180 - 72)\,e^{-0.025t}$</p>
+      <p>$140 - 72 = 108\,e^{-0.025t} \;\Rightarrow\; 68 = 108\,e^{-0.025t}$</p>
+      <p>$e^{-0.025t} = \dfrac{68}{108} = 0.6296$</p>
+      <p>$-0.025t = \ln(0.6296) = -0.4626$</p>
+      <p>$t = \dfrac{0.4626}{0.025} = 18.5\,\text{min}.$</p>
+      <p>Or using the closed-form: $\;t = \dfrac{1}{0.025}\ln\!\!\left(\dfrac{180-72}{140-72}\right) = 40\,\ln\!\!\left(\dfrac{108}{68}\right) = 40\,\ln(1.5882) \approx 40 \times 0.4626 = 18.5\,\text{min}.$</p>
+      <p><strong>Answer.</strong>
+        <span class="boxed-final">$t \approx 18.5$ minutes</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PRACTICE PROBLEMS
+       ============================================================ -->
+  <div class="part-header page-break">Practice Problems</div>
+
+  <!-- ===== Problem 1 ===== -->
+  <div class="problem-wrap">
+    <span class="problem-number">Problem 1</span>
+    <span class="problem-title">Temperature after time — ceramic mug</span>
+    <div class="statement">
+      <div class="label">Statement</div>
+      A ceramic mug of coffee starts at $T_0 = 185\,°\text{F}$ in a room at $T_{\text{room}} = 68\,°\text{F}$.
+      The cooling constant for this mug is $k = 0.018\,\text{min}^{-1}$.
+      <ol class="parts">
+        <li>Write the complete equation $T(t)$ for this situation.</li>
+        <li>What is the temperature after 15 minutes?</li>
+        <li>What is the horizontal asymptote? What does it represent physically?</li>
+      </ol>
+    </div>
+    <div class="work-space"></div>
+    <div class="solution-block">
+      <div class="label">Solution</div>
+      <div class="step"><b>(a) Equation.</b>
+        $T(t) = 68 + (185 - 68)\,e^{-0.018t} = 68 + 117\,e^{-0.018t}$
+        <br><span class="boxed-final">$T(t) = 68 + 117e^{-0.018t}$</span>
+      </div>
+      <div class="step"><b>(b) At $t = 15$.</b>
+        $T(15) = 68 + 117\,e^{-0.018 \times 15} = 68 + 117\,e^{-0.27}$
+        <br>$e^{-0.27} \approx 0.7634$
+        <br>$T(15) = 68 + 117 \times 0.7634 = 68 + 89.3 \approx 157.3\,°\text{F}$
+        <br><span class="boxed-final">$T(15) \approx 157\,°\text{F}$</span>
+      </div>
+      <div class="step"><b>(c) Horizontal asymptote.</b>
+        As $t \to \infty$, $e^{-0.018t} \to 0$, so $T \to 68$.
+        <br><span class="boxed-final">Horizontal asymptote: $T = 68\,°\text{F}$ = room temperature</span>
+        <br><em style="color:#555; font-size:9.5pt;">Physical meaning: the coffee will never drop below 68 °F (room temp). It asymptotically approaches but never crosses.</em>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Problem 2 ===== -->
+  <div class="problem-wrap">
+    <span class="problem-number">Problem 2</span>
+    <span class="problem-title">Find $k$ from one measurement</span>
+    <div class="statement">
+      <div class="label">Statement</div>
+      A cup of coffee starts at $T_0 = 180\,°\text{F}$ in a $70\,°\text{F}$ room.
+      After 20 minutes, the coffee is $130\,°\text{F}$.
+      <ol class="parts">
+        <li>Find the cooling constant $k$.</li>
+        <li>Write the equation $T(t)$.</li>
+      </ol>
+    </div>
+    <div class="work-space"></div>
+    <div class="solution-block">
+      <div class="label">Solution</div>
+      <div class="step"><b>(a) Solve for $k$.</b>
+        At $t = 20$: $\;130 = 70 + (180 - 70)\,e^{-20k}$
+        <br>$60 = 110\,e^{-20k}$
+        <br>$e^{-20k} = \dfrac{60}{110} = 0.5\overline{45}$
+        <br>$-20k = \ln(60/110) = \ln(6/11) \approx -0.6061$
+        <br>$k = \dfrac{0.6061}{20} \approx 0.0303\,\text{min}^{-1}$
+        <br><span class="boxed-final">$k \approx 0.0303\,\text{min}^{-1}$</span>
+      </div>
+      <div class="step"><b>(b) Full equation.</b>
+        <br><span class="boxed-final">$T(t) = 70 + 110\,e^{-0.0303t}$</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Problem 3 ===== -->
+  <div class="problem-wrap page-break">
+    <span class="problem-number">Problem 3</span>
+    <span class="problem-title">When does it reach drinking temperature?</span>
+    <div class="statement">
+      <div class="label">Statement</div>
+      Coffee starts at $180\,°\text{F}$ in a $72\,°\text{F}$ room with $k = 0.030\,\text{min}^{-1}$.
+      You like to drink coffee at exactly $140\,°\text{F}$.
+      <ol class="parts">
+        <li>How long do you have to wait?</li>
+        <li>Find $t_{1/2}$ (the half-temperature-difference time).</li>
+      </ol>
+    </div>
+    <div class="work-space"></div>
+    <div class="solution-block">
+      <div class="label">Solution</div>
+      <div class="step"><b>(a) Solve for $t$.</b>
+        $140 = 72 + (180 - 72)\,e^{-0.030t}$
+        <br>$68 = 108\,e^{-0.030t}$
+        <br>$e^{-0.030t} = \dfrac{68}{108} \approx 0.6296$
+        <br>$-0.030t = \ln(0.6296) \approx -0.4626$
+        <br>$t = \dfrac{0.4626}{0.030} \approx 15.4\,\text{min}$
+        <br><span class="boxed-final">$t \approx 15.4$ minutes</span>
+      </div>
+      <div class="step"><b>(b) Half-temperature-difference time.</b>
+        $t_{1/2} = \dfrac{\ln 2}{k} = \dfrac{0.6931}{0.030} \approx 23.1\,\text{min}$
+        <br>Meaning: at $t = 23.1$ min the temperature difference from room is cut in half.
+        <br>Check: difference starts at $180 - 72 = 108$ °F. Half = 54 °F. So $T = 72 + 54 = 126\,°\text{F}$.
+        <br><span class="boxed-final">$t_{1/2} \approx 23.1$ minutes</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Problem 4 ===== -->
+  <div class="problem-wrap">
+    <span class="problem-number">Problem 4</span>
+    <span class="problem-title">Identify room temperature from a graph</span>
+    <div class="statement">
+      <div class="label">Statement</div>
+      A cooling curve is given by $T(t) = 65 + 120\,e^{-0.022t}$.
+      <ol class="parts">
+        <li>What is the room temperature (horizontal asymptote)?</li>
+        <li>What was the initial temperature $T_0$?</li>
+        <li>What is the temperature at $t = 60$ minutes?</li>
+        <li>At what time does the coffee reach $90\,°\text{F}$?</li>
+      </ol>
+    </div>
+    <div class="work-space"></div>
+    <div class="solution-block">
+      <div class="label">Solution</div>
+      <div class="step"><b>(a) Horizontal asymptote.</b>
+        As $e^{-0.022t} \to 0$: $T \to 65$.
+        <br><span class="boxed-final">$T_{\text{room}} = 65\,°\text{F}$</span>
+      </div>
+      <div class="step"><b>(b) Initial temperature.</b>
+        $T(0) = 65 + 120\,e^0 = 65 + 120 = 185$.
+        <br><span class="boxed-final">$T_0 = 185\,°\text{F}$</span>
+      </div>
+      <div class="step"><b>(c) At $t = 60$.</b>
+        $T(60) = 65 + 120\,e^{-0.022 \times 60} = 65 + 120\,e^{-1.32}$
+        <br>$e^{-1.32} \approx 0.2671$
+        <br>$T(60) = 65 + 120 \times 0.2671 = 65 + 32.05 \approx 97.1\,°\text{F}$
+        <br><span class="boxed-final">$T(60) \approx 97\,°\text{F}$</span>
+      </div>
+      <div class="step"><b>(d) When does $T = 90$?</b>
+        $90 = 65 + 120\,e^{-0.022t}$
+        <br>$25 = 120\,e^{-0.022t} \;\Rightarrow\; e^{-0.022t} = 25/120 = 0.2083$
+        <br>$-0.022t = \ln(0.2083) \approx -1.5686$
+        <br>$t \approx 71.3\,\text{min}$
+        <br><span class="boxed-final">$t \approx 71.3$ minutes</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Problem 5 ===== -->
+  <div class="problem-wrap page-break">
+    <span class="problem-number">Problem 5</span>
+    <span class="problem-title">Two-point data fit + prediction</span>
+    <div class="statement">
+      <div class="label">Statement</div>
+      A scientist measures cooling data in a $68\,°\text{F}$ lab:
+      <ul style="margin: 6px 0 0 22px;">
+        <li>At $t = 5$ min: $T = 160\,°\text{F}$</li>
+        <li>At $t = 15$ min: $T = 130\,°\text{F}$</li>
+      </ul>
+      <ol class="parts">
+        <li>Find the initial temperature $T_0$ and the cooling constant $k$.
+            <em>(Hint: set up two equations and divide to eliminate $T_0$.)</em></li>
+        <li>Predict the temperature at $t = 40$ min.</li>
+        <li>When will the object be within $5\,°\text{F}$ of room temperature?</li>
+      </ol>
+    </div>
+    <div class="work-space" style="min-height:240px;"></div>
+    <div class="solution-block">
+      <div class="label">Solution</div>
+      <div class="step"><b>(a) Set up equations.</b>
+        Let $A = T_0 - 68$. Then $T(t) = 68 + A\,e^{-kt}$.
+        <br>At $t = 5$: $\;160 - 68 = 92 = A\,e^{-5k}$ &nbsp;&nbsp; ...(1)
+        <br>At $t = 15$: $\;130 - 68 = 62 = A\,e^{-15k}$ &nbsp;&nbsp; ...(2)
+        <br><b>Divide (2) ÷ (1):</b>
+        $\;\dfrac{62}{92} = \dfrac{A\,e^{-15k}}{A\,e^{-5k}} = e^{-10k}$
+        <br>$e^{-10k} = 0.6739 \;\Rightarrow\; -10k = \ln(0.6739) = -0.3941 \;\Rightarrow\; k \approx 0.03941$
+        <br><b>Find $A$ from (1):</b>
+        $\;A = 92\,/\,e^{-5 \times 0.03941} = 92\,/\,e^{-0.1971} = 92\,/\,0.8211 \approx 112.0$
+        <br>So $T_0 = 68 + 112 = 180\,°\text{F}$.
+        <br><span class="boxed-final">$T_0 \approx 180\,°\text{F}$,  $k \approx 0.0394\,\text{min}^{-1}$</span>
+        <br>Full equation: $T(t) = 68 + 112\,e^{-0.0394t}$
+      </div>
+      <div class="step"><b>(b) At $t = 40$.</b>
+        $T(40) = 68 + 112\,e^{-0.0394 \times 40} = 68 + 112\,e^{-1.576}$
+        <br>$e^{-1.576} \approx 0.2068$
+        <br>$T(40) = 68 + 112 \times 0.2068 \approx 68 + 23.2 \approx 91.2\,°\text{F}$
+        <br><span class="boxed-final">$T(40) \approx 91\,°\text{F}$</span>
+      </div>
+      <div class="step"><b>(c) Within 5 °F of room ($T = 73\,°\text{F}$).</b>
+        $73 = 68 + 112\,e^{-0.0394t} \;\Rightarrow\; 5 = 112\,e^{-0.0394t}$
+        <br>$e^{-0.0394t} = 5/112 = 0.04464$
+        <br>$-0.0394t = \ln(0.04464) = -3.109 \;\Rightarrow\; t \approx 78.9\,\text{min}$
+        <br><span class="boxed-final">$t \approx 79$ minutes</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Problem 6 ===== -->
+  <div class="problem-wrap">
+    <span class="problem-number">Problem 6</span>
+    <span class="problem-title">Warming coffee — a reverse scenario</span>
+    <div class="statement">
+      <div class="label">Statement</div>
+      An iced drink starts at $T_0 = 38\,°\text{F}$ in a $75\,°\text{F}$ room.
+      The same formula applies: $T(t) = T_{\text{room}} + (T_0 - T_{\text{room}})\,e^{-kt}$,
+      but now $(T_0 - T_{\text{room}}) < 0$, so the drink <em>warms</em>.
+      Given $k = 0.035\,\text{min}^{-1}$:
+      <ol class="parts">
+        <li>What is the horizontal asymptote? What does it represent?</li>
+        <li>After 20 minutes, what is the temperature of the drink?</li>
+        <li>How long until the drink reaches $60\,°\text{F}$?</li>
+      </ol>
+    </div>
+    <div class="work-space"></div>
+    <div class="solution-block">
+      <div class="label">Solution</div>
+      <div class="step"><b>(a) Horizontal asymptote.</b>
+        As $t \to \infty$: $T \to T_{\text{room}} = 75\,°\text{F}$.
+        The drink asymptotically warms toward room temperature.
+        <br><span class="boxed-final">Asymptote: $T = 75\,°\text{F}$</span>
+      </div>
+      <div class="step"><b>(b) At $t = 20$.</b>
+        $T(20) = 75 + (38 - 75)\,e^{-0.035 \times 20} = 75 + (-37)\,e^{-0.70}$
+        <br>$e^{-0.70} \approx 0.4966$
+        <br>$T(20) = 75 - 37 \times 0.4966 = 75 - 18.4 \approx 56.6\,°\text{F}$
+        <br><span class="boxed-final">$T(20) \approx 56.6\,°\text{F}$</span>
+      </div>
+      <div class="step"><b>(c) When $T = 60\,°\text{F}$.</b>
+        $60 = 75 + (-37)\,e^{-0.035t} \;\Rightarrow\; -15 = -37\,e^{-0.035t}$
+        <br>$e^{-0.035t} = \dfrac{15}{37} = 0.4054$
+        <br>$-0.035t = \ln(0.4054) = -0.9027$
+        <br>$t = \dfrac{0.9027}{0.035} \approx 25.8\,\text{min}$
+        <br><span class="boxed-final">$t \approx 25.8$ minutes</span>
+      </div>
+      <div class="step" style="color:#555; font-size:9.5pt;">
+        <em>Key insight.</em> The same formula works for both cooling AND warming. The sign of $(T_0 - T_{\text{room}})$
+        determines the direction. The asymptote is always $T_{\text{room}}$ — the environment always wins.
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Newton School · 2026-05-13 · Joon Lee · Pre-Calculus<br>
+    Newton's Law of Cooling — U4 PBA Lecture Note &copy; Newton School
+  </div>
+
+</div>
+</body>
+</html>
